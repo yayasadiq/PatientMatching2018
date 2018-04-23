@@ -8,6 +8,7 @@ import optimisation.algorithm.HillClimber;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.utils.CSVWriter;
+import optimisation.utils.TimeMeasurer;
 import optimisation.utils.Utils;
 
 /**
@@ -32,6 +34,9 @@ public class PatientSimMain {
 	private static final int NUMBER_CONTROL_PATIENT = 1500;
 
 	public static void main(String[] args) {
+		TimeMeasurer timeMeasurer = new TimeMeasurer();
+		timeMeasurer.startTimer("Total time");
+		
     	String cbPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/ControlsUpdated.csv"; 
         String qPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/CasesUpdated.csv";
         String outPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Output.csv";
@@ -43,19 +48,22 @@ public class PatientSimMain {
 //            String cbPath = args[0];
 //            String qPath = args[1];
 //            String outPath = args[2];        
-    	
+        timeMeasurer.startTimer("Generate CSV");
         generateDatas(cbPath, qPath);
-    	
+        timeMeasurer.stopTimer();
         
         
         PatientSim app = new PatientSim(cbPath, outPath);
         List<String> controls = new ArrayList();
         
         try{
+        	timeMeasurer.startTimer("Initialisation");
             app.configure();
             CBRCaseBase caseBase = app.preCycle();
             Collection<CBRCase> cases = caseBase.getCases();
+            timeMeasurer.stopTimer();
             
+            timeMeasurer.startTimer("Cycling");
             Map<String, CBRCase> casesMap = new HashMap();
             for(CBRCase c:cases){
                 casesMap.put((String)c.getID(), c);
@@ -72,13 +80,13 @@ public class PatientSimMain {
             for(CBRCase c:qCases){
                 app.cycle(c);
             }
-            
+            timeMeasurer.stopTimer();
+            timeMeasurer.startTimer("Evaluating");
             double ave_sim = app.getTotal_sim()/qCases.size();
             System.out.println("\nAve Sim: "+ave_sim);
             app.postCycle();
             
             controls = app.getRetrievedCases();
-            
             int numberOfTrialPatients = qCases.size();	
 			int[] startingSolution = new int[numberOfTrialPatients];
 			for(int i=0; i<numberOfTrialPatients; i++){ // Currently set with dummy indices for testing purposes
@@ -90,22 +98,26 @@ public class PatientSimMain {
 			System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
 			double evaluateSolution = problem.evaluate(startingSolution);
 			System.out.println("Initial Solution Fitness: "+ evaluateSolution);
-			
-			int numberOfFitnessEvaluations = 1000;
+			timeMeasurer.stopTimer();
+			timeMeasurer.startTimer("Local search");
+            int numberOfFitnessEvaluations = 1000;
 			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
 			localsearch.evolve();
 			
 			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
 			double localSearchSolution = localsearch.getBestFitness();
 			System.out.println("Best Fitness: "+localSearchSolution);
-						
+			timeMeasurer.stopTimer();
+            timeMeasurer.startTimer("Writing results");
 			writeResults(statPath, evaluateSolution, localSearchSolution);
-			
+			timeMeasurer.stopTimer();
 			
         }catch(ExecutionException e){
             System.err.println(e.getMessage());
         }
 //        }
+        timeMeasurer.stopTimer();
+        timeMeasurer.displayTimes();
     }
 
 	private static void writeResults(String statPath, double evaluateSolution, double localSearchSolution) {

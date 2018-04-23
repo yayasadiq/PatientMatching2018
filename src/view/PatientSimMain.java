@@ -29,7 +29,7 @@ import optimisation.utils.Utils;
 public class PatientSimMain {
     
     private static final int NUMBER_TRIAL_PATIENT = 70;
-	private static final int NUMBER_CONTROL_PATIENT = 500;
+	private static final int NUMBER_CONTROL_PATIENT = 1500;
 
 	public static void main(String[] args) {
     	String cbPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/ControlsUpdated.csv"; 
@@ -44,14 +44,7 @@ public class PatientSimMain {
 //            String qPath = args[1];
 //            String outPath = args[2];        
     	
-        try {
-        	CSVWriter csvMaker = new CSVWriter(cbPath);
-        	csvMaker.makeDatas(NUMBER_CONTROL_PATIENT);
-        	csvMaker.setFilepath(qPath);
-        	csvMaker.makeDatas(NUMBER_TRIAL_PATIENT);        	
-        } catch (FileNotFoundException e) {
-        	System.err.println(e.getMessage() + '\n');
-        }
+        generateDatas(cbPath, qPath);
     	
         
         
@@ -106,14 +99,7 @@ public class PatientSimMain {
 			double localSearchSolution = localsearch.getBestFitness();
 			System.out.println("Best Fitness: "+localSearchSolution);
 						
-			CSVWriter csvWriter = new CSVWriter(statPath);
-			StringBuilder sb = computeAndDisplayARecapOfTheTests(statPath, evaluateSolution, localSearchSolution);		
-			
-			try {
-				csvWriter.addLignesToFile(sb);
-			} catch (IOException e) {
-				System.err.println("Can't write the folder\n" + e.getMessage());
-			}
+			writeResults(statPath, evaluateSolution, localSearchSolution);
 			
 			
         }catch(ExecutionException e){
@@ -121,6 +107,28 @@ public class PatientSimMain {
         }
 //        }
     }
+
+	private static void writeResults(String statPath, double evaluateSolution, double localSearchSolution) {
+		CSVWriter csvWriter = new CSVWriter(statPath);
+		StringBuilder sb = computeAndDisplayARecapOfTheTests(statPath, evaluateSolution, localSearchSolution);		
+		
+		try {
+			csvWriter.addLignesToFile(sb);
+		} catch (IOException e) {
+			System.err.println("Can't write the folder\n" + e.getMessage());
+		}
+	}
+
+	private static void generateDatas(String cbPath, String qPath) {
+		try {
+        	CSVWriter csvMaker = new CSVWriter(cbPath);
+        	csvMaker.makeDatas(NUMBER_CONTROL_PATIENT);
+        	csvMaker.setFilepath(qPath);
+        	csvMaker.makeDatas(NUMBER_TRIAL_PATIENT);        	
+        } catch (FileNotFoundException e) {
+        	System.err.println(e.getMessage() + '\n');
+        }
+	}
 
 	private static StringBuilder createRecapLigne(double evaluateSolution, double localSearchSolution, double averageDif,
 			double currentDif) {
@@ -161,8 +169,10 @@ public class PatientSimMain {
 		int nbrTests = datas.size() + 1; 
 		double averageDif = 0.0;
 		double averageEvalSol = 0.0;
-		double averageLocalSol = 0.0; 
-		
+		double averageLocalSol = 0.0;
+		//add current values to array and make the averages
+		String[] stringArray = {null, String.valueOf(evaluateSolution), null, String.valueOf(localSearchSolution)};
+		datas.add(stringArray);
 		for (String[] strings : datas) {
 			double evalSol = Double.parseDouble(strings[1]);
 			double localSol = Double.parseDouble(strings[3]);
@@ -172,21 +182,15 @@ public class PatientSimMain {
 		}
 		double currentDif = Math.abs(evaluateSolution - localSearchSolution);
 		
-		averageDif = averageDif + currentDif;
 		averageDif = averageDif / nbrTests;
-		
-		averageEvalSol = averageEvalSol + evaluateSolution;
-		averageLocalSol = averageLocalSol + localSearchSolution;
-		
 		averageEvalSol = averageEvalSol / nbrTests;
 		averageLocalSol = averageLocalSol / nbrTests;
 		
-		System.out.println("Difference : " + currentDif);
-		System.out.println("The number of tests done : " + nbrTests);
+		System.out.println("Current difference : " + currentDif);
+		System.out.println("Number of tests done : " + nbrTests);
 		System.out.println("Average of the difference : " + averageDif);
 		System.out.println("Average of the starting solution : " + averageEvalSol);
 		System.out.println("Average of the local search : " + averageLocalSol);
-		double[] tab = {averageDif, currentDif}; 
 		return createRecapLigne(evaluateSolution, localSearchSolution, averageDif, currentDif);
 	}
 	
@@ -212,53 +216,3 @@ public class PatientSimMain {
 //    }
     
 }
-
-///*
-// * To change this template, choose Tools | Templates
-// * and open the template in the editor.
-// */
-//package view;
-//
-//import java.util.Collection;
-//import jcolibri.cbrcore.CBRCase;
-//import jcolibri.exception.ExecutionException;   
-//import model.CsvConnector;
-//import patientsim.PatientSim;
-//
-///**
-// *
-// * @author ss6035
-// */
-//public class PatientSimMain {
-//    
-//    public static void main(String[] args){
-////        String cbPath = "C:\\OneDrive\\PostDoc\\Nirmalie\\PatientData\\Controls.csv"; 
-////        String qPath = "C:\\OneDrive\\PostDoc\\Nirmalie\\PatientData\\Cases.csv";
-//        if(args.length<3){
-//            System.out.println("USAGE:  java -jar PatientPairs \tcontrols_file \tcases_file \toutput_file");
-//            System.exit(1);
-//        }else{
-//            String cbPath = args[0];
-//            String qPath = args[1];
-//            String outPath = args[2];
-//            PatientSim app = new PatientSim(cbPath, outPath);
-//            try{
-//                app.configure();
-//                app.preCycle();
-//
-//                CsvConnector conn = new CsvConnector(qPath);
-//                Collection<CBRCase> qCases = conn.retrieveAllCases();
-//
-//                for(CBRCase c:qCases){
-//                    app.cycle(c);
-//                }
-//
-//                app.postCycle();
-//
-//            }catch(ExecutionException e){
-//                System.err.println(e.getMessage());
-//            }
-//        }
-//    }
-//    
-//}

@@ -60,6 +60,7 @@ public class PatientSim implements StandardCBRApplication{
     private List<Double> similarities;
     private Map<Integer,CBRCase> casesMap;
     private List<CBRCase> qCases;
+    private double best_total_sim = 0;
 
     public PatientSim(String cbPath, String outPath) {
         this.cbPath = cbPath; 
@@ -113,10 +114,17 @@ public class PatientSim implements StandardCBRApplication{
         //Collection<CBRCase> fCases = FilterBasedRetrievalMethod.filterCases(casebase.getCases(), cbrq, fConfig);
         
         //Collection<RetrievalResult> result = NNScoringMethod.evaluateSimilarity(fCases, cbrq, nnConfig);
+        
         Collection<RetrievalResult> result = NNScoringMethod.evaluateSimilarity(casebase.getCases(), cbrq, nnConfig);
         Collection<RetrievalResult> retievedCases = SelectCases.selectTopKRR(result, 20);
-        DecimalFormat df = new DecimalFormat("0.00");   
         
+        DecimalFormat df = new DecimalFormat("0.00"); 
+        
+        for (RetrievalResult retrievalResult : retievedCases) {
+			best_total_sim += retrievalResult.getEval();
+			break;
+		}
+                
         for(RetrievalResult rr:retievedCases){
             if(!retrievedCases.contains((String)rr.get_case().getID())){
                 double sim = rr.getEval();
@@ -135,6 +143,7 @@ public class PatientSim implements StandardCBRApplication{
                 break;
             }
         }
+        
     }
 
     public List<String> getRetrievedCases() {
@@ -186,5 +195,9 @@ public class PatientSim implements StandardCBRApplication{
             this.casesMap.put(Integer.parseInt((String)c.getID()), c);
         }
     }
+
+	public double getBest_total_sim() {
+		return best_total_sim;
+	}
     
 }

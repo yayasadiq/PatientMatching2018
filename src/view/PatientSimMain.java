@@ -9,6 +9,8 @@ import optimisation.algorithm.HillClimber;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Time;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,39 +33,23 @@ import optimisation.utils.Utils;
 public class PatientSimMain {
     
     private static final int NUMBER_TRIAL_PATIENT = 70;
-	private static final int NUMBER_CONTROL_PATIENT = 1500;
+	private static final int NUMBER_CONTROL_PATIENT = 33000;
 
 	public static void main(String[] args) {
-		TimeMeasurer timeMeasurer = new TimeMeasurer();
-		timeMeasurer.startTimer("Total time");
 		
-    	String cbPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/ControlsUpdated.csv"; 
-        String qPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/CasesUpdated.csv";
+    	String cbPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Controls.csv"; 
+        String qPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Cases.csv";
         String outPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Output.csv";
-        String statPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Statistic_var.csv";
-//        if(args.length<3){
-//            System.out.println("USAGE:  java -jar PatientMatching.jar \tcontrols_file \tcases_file \toutput_file");
-//            System.exit(1);
-//        }else{
-//            String cbPath = args[0];
-//            String qPath = args[1];
-//            String outPath = args[2];        
-        timeMeasurer.startTimer("Generate CSV");
-        generateDatas(cbPath, qPath);
-        timeMeasurer.stopTimer();
-        
-        
         PatientSim app = new PatientSim(cbPath, outPath);
         List<String> controls = new ArrayList();
         
-        try{
-        	timeMeasurer.startTimer("Initialisation");
+        
+		try{
             app.configure();
             CBRCaseBase caseBase = app.preCycle();
             Collection<CBRCase> cases = caseBase.getCases();
-            timeMeasurer.stopTimer();
             
-            timeMeasurer.startTimer("Cycling");
+            
             Map<String, CBRCase> casesMap = new HashMap();
             for(CBRCase c:cases){
                 casesMap.put((String)c.getID(), c);
@@ -75,14 +61,12 @@ public class PatientSimMain {
             for(CBRCase c:qCases){
                 queriesMap.put((String)c.getID(), c);
             }
-
             app.setqCases(qCases);
             for(CBRCase c:qCases){
                 app.cycle(c);
             }
-            timeMeasurer.stopTimer();
-            timeMeasurer.startTimer("Evaluating");
-            double ave_sim = app.getTotal_sim()/qCases.size();
+            double total_sim = app.getTotal_sim();
+            double ave_sim = total_sim/qCases.size();
             System.out.println("\nAve Sim: "+ave_sim);
             app.postCycle();
             
@@ -98,8 +82,8 @@ public class PatientSimMain {
 			System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
 			double evaluateSolution = problem.evaluate(startingSolution);
 			System.out.println("Initial Solution Fitness: "+ evaluateSolution);
-			timeMeasurer.stopTimer();
-			timeMeasurer.startTimer("Local search");
+			
+	
             int numberOfFitnessEvaluations = 1000;
 			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
 			localsearch.evolve();
@@ -107,17 +91,19 @@ public class PatientSimMain {
 			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
 			double localSearchSolution = localsearch.getBestFitness();
 			System.out.println("Best Fitness: "+localSearchSolution);
-			timeMeasurer.stopTimer();
-            timeMeasurer.startTimer("Writing results");
-			writeResults(statPath, evaluateSolution, localSearchSolution);
-			timeMeasurer.stopTimer();
+			
 			
         }catch(ExecutionException e){
             System.err.println(e.getMessage());
         }
+
 //        }
-        timeMeasurer.stopTimer();
-        timeMeasurer.displayTimes();
+		double total_sim = app.getTotal_sim();
+        System.out.println("\nSimilarities sum : " + total_sim);
+        double best_total_sim = app.getBest_total_sim();
+		System.out.println("Best Similarities sum : " + best_total_sim);
+		System.out.println("Difference : " + String.valueOf(best_total_sim - total_sim));
+		
     }
 
 	private static void writeResults(String statPath, double evaluateSolution, double localSearchSolution) {

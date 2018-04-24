@@ -17,11 +17,11 @@ public class ApproxEqual implements FilterPredicate{
     public boolean compute(Object caseObject, Object queryObject) throws NoApplicableFilterPredicateException{
         if(caseObject instanceof Integer  && queryObject instanceof Integer){
             if(caseObject.equals(queryObject))
-                return true;
+            	return true;
             else if(Math.abs((Integer)caseObject-(Integer)queryObject)==1)
-               return true;
+            	return true;
             else
-                return false;
+            	return false;
         }
         return false;
     }

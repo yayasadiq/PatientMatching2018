@@ -23,6 +23,8 @@ import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.utils.CSVWriter;
+import optimisation.utils.Generator;
+import optimisation.utils.PatientGenerator;
 import optimisation.utils.TimeMeasurer;
 import optimisation.utils.Utils;
 
@@ -36,10 +38,11 @@ public class PatientSimMain {
 	private static final int NUMBER_CONTROL_PATIENT = 33000;
 
 	public static void main(String[] args) {
-		
-    	String cbPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Controls.csv"; 
-        String qPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Cases.csv";
-        String outPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Output.csv";
+		String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
+    	String cbPath = dirPath + "Controls.csv"; 
+        String qPath = dirPath + "Cases.csv";
+        String outPath = dirPath + "Output.csv";
+        String outSim = dirPath + "outSim.csv";
         PatientSim app = new PatientSim(cbPath, outPath);
         List<String> controls = new ArrayList();
         
@@ -62,47 +65,62 @@ public class PatientSimMain {
                 queriesMap.put((String)c.getID(), c);
             }
             app.setqCases(qCases);
-            for(CBRCase c:qCases){
-                app.cycle(c);
-            }
-            double total_sim = app.getTotal_sim();
-            double ave_sim = total_sim/qCases.size();
-            System.out.println("\nAve Sim: "+ave_sim);
-            app.postCycle();
-            
-            controls = app.getRetrievedCases();
-            int numberOfTrialPatients = qCases.size();	
-			int[] startingSolution = new int[numberOfTrialPatients];
-			for(int i=0; i<numberOfTrialPatients; i++){ // Currently set with dummy indices for testing purposes
-				startingSolution[i] = Integer.parseInt(controls.get(i));
+            app.writeControls(outSim);
+            double length = qCases.size();
+            try {
+            	double compteur = 0;
+	            for(CBRCase c:qCases){
+					app.writeSimilarities(c, outSim);
+					compteur ++;
+					int progression = (int) ((compteur/length) * 100);
+					System.out.println("Progression : " +  progression + "%");
+	                //app.cycle(c);
+	            }
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			
-			PatientMatchingProblem problem = new PatientMatchingProblem(app);
-			
-			System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
-			double evaluateSolution = problem.evaluate(startingSolution);
-			System.out.println("Initial Solution Fitness: "+ evaluateSolution);
-			
-	
-            int numberOfFitnessEvaluations = 1000;
-			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
-			localsearch.evolve();
-			
-			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
-			double localSearchSolution = localsearch.getBestFitness();
-			System.out.println("Best Fitness: "+localSearchSolution);
-			
-			
-        }catch(ExecutionException e){
-            System.err.println(e.getMessage());
-        }
-
+		}catch(ExecutionException e){
+          System.err.println(e.getMessage());
+      }
+           
+//            double total_sim = app.getTotal_sim();
+//            double ave_sim = total_sim/qCases.size();
+//            System.out.println("\nAve Sim: "+ave_sim);
+//            app.postCycle();
+//            
+//            controls = app.getRetrievedCases();
+//            int numberOfTrialPatients = qCases.size();	
+//			int[] startingSolution = new int[numberOfTrialPatients];
+//			for(int i=0; i<numberOfTrialPatients; i++){ // Currently set with dummy indices for testing purposes
+//				startingSolution[i] = Integer.parseInt(controls.get(i));
+//			}
+//			
+//			PatientMatchingProblem problem = new PatientMatchingProblem(app);
+//			
+//			System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
+//			double evaluateSolution = problem.evaluate(startingSolution);
+//			System.out.println("Initial Solution Fitness: "+ evaluateSolution);
+//			
+//	
+//            int numberOfFitnessEvaluations = 1000;
+//			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
+//			localsearch.evolve();
+//			
+//			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
+//			double localSearchSolution = localsearch.getBestFitness();
+//			System.out.println("Best Fitness: "+localSearchSolution);
+//			
+//			
+//        }catch(ExecutionException e){
+//            System.err.println(e.getMessage());
 //        }
-		double total_sim = app.getTotal_sim();
-        System.out.println("\nSimilarities sum : " + total_sim);
-        double best_total_sim = app.getBest_total_sim();
-		System.out.println("Best Similarities sum : " + best_total_sim);
-		System.out.println("Difference : " + String.valueOf(best_total_sim - total_sim));
+//
+////        }
+//		double total_sim = app.getTotal_sim();
+//        System.out.println("\nSimilarities sum : " + total_sim);
+//        double best_total_sim = app.getBest_total_sim();
+//		System.out.println("Best Similarities sum : " + best_total_sim);
+//		System.out.println("Difference : " + String.valueOf(best_total_sim - total_sim));
 		
     }
 
@@ -117,12 +135,12 @@ public class PatientSimMain {
 		}
 	}
 
-	private static void generateDatas(String cbPath, String qPath) {
+	private static void generatePatients(String cbPath, String qPath) {
 		try {
-        	CSVWriter csvMaker = new CSVWriter(cbPath);
-        	csvMaker.makeDatas(NUMBER_CONTROL_PATIENT);
-        	csvMaker.setFilepath(qPath);
-        	csvMaker.makeDatas(NUMBER_TRIAL_PATIENT);        	
+        	Generator generator = new PatientGenerator(cbPath);
+        	generator.makeData(NUMBER_CONTROL_PATIENT);
+        	generator.setFilepath(qPath);
+        	generator.makeData(NUMBER_TRIAL_PATIENT);        	
         } catch (FileNotFoundException e) {
         	System.err.println(e.getMessage() + '\n');
         }

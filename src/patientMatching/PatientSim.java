@@ -11,6 +11,7 @@ import extensions.Euclidean;
 import extensions.Jaccard;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -39,6 +40,7 @@ import jcolibri.method.retrieve.NNretrieval.similarity.local.Interval;
 //import jcolibri.method.retrieve.NNretrieval.similarity.local.Equal;
 import jcolibri.method.retrieve.RetrievalResult;
 import jcolibri.method.retrieve.selection.SelectCases;
+import optimisation.utils.CSVWriter;
 import patientMatching.CsvConnector;
 import patientMatching.PatientDescription;
 
@@ -198,6 +200,35 @@ public class PatientSim implements StandardCBRApplication{
 
 	public double getBest_total_sim() {
 		return best_total_sim;
+	}
+
+	public void writeSimilarities(CBRCase c, String path) throws IOException {
+		CSVWriter csvWriter = new CSVWriter(path);
+		Collection<RetrievalResult> result = NNScoringMethod.evaluateSimilarity(casebase.getCases(), c, nnConfig);
+        Collection<RetrievalResult> retievedCases = SelectCases.selectAllRR(result);
+		StringBuilder sb = new StringBuilder();
+		sb.append(c.getID()).append(',');       
+        for (RetrievalResult retrievalResult : retievedCases) {
+			sb.append(retrievalResult.getEval()).append(',');
+		}
+        sb.append('\n');
+        csvWriter.addLignesToFile(sb);
+	}
+
+	public void writeControls(String outSim) {
+		CSVWriter csvWriter = new CSVWriter(outSim);
+		StringBuilder sb = new StringBuilder();
+        sb.append("id trial patient / id control patient").append(',');
+        for (Map.Entry entry: casesMap.entrySet()) {
+			sb.append(entry.getKey()).append(',');
+		}		
+        sb.append('\n');
+        try {
+			csvWriter.createCSVWithContent(sb);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+        System.out.println("Header created");
 	}
     
 }

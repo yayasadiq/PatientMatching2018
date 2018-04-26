@@ -18,6 +18,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -63,6 +64,8 @@ public class PatientSim implements StandardCBRApplication{
     private Map<Integer,CBRCase> casesMap;
     private List<CBRCase> qCases;
     private double best_total_sim = 0;
+    private List<String> controls;
+    private Map<String, Double> controlsSim;
 
     public PatientSim(String cbPath, String outPath) {
         this.cbPath = cbPath; 
@@ -74,7 +77,8 @@ public class PatientSim implements StandardCBRApplication{
         casesMap = new HashMap();
         connector  = new CsvConnector(cbPath);
         casebase = new MyLinealCaseBase();
-        
+        controls = new ArrayList<>();
+        controlsSim = new HashMap<>();
         fConfig = new FilterConfig();
         fConfig.addPredicate(new Attribute("age", PatientDescription.class), new ApproxEqual());
         
@@ -209,7 +213,10 @@ public class PatientSim implements StandardCBRApplication{
 		StringBuilder sb = new StringBuilder();
 		sb.append(c.getID()).append(',');       
         for (RetrievalResult retrievalResult : retievedCases) {
-			sb.append(retrievalResult.getEval()).append(',');
+			controlsSim.put((String)retrievalResult.get_case().getID(), retrievalResult.getEval());
+		}
+        for (String string : controls) {
+			sb.append(controlsSim.get(string)).append(',');			
 		}
         sb.append('\n');
         csvWriter.addLignesToFile(sb);
@@ -220,7 +227,9 @@ public class PatientSim implements StandardCBRApplication{
 		StringBuilder sb = new StringBuilder();
         sb.append("id trial patient / id control patient").append(',');
         for (Map.Entry entry: casesMap.entrySet()) {
-			sb.append(entry.getKey()).append(',');
+			Object id = entry.getKey();
+			sb.append(id).append(',');
+			controls.add(String.valueOf(id));
 		}		
         sb.append('\n');
         try {

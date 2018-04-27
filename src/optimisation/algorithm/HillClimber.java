@@ -1,8 +1,10 @@
 package optimisation.algorithm;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import optimisation.patientmatching.PatientMatchingProblem;
+import optimisation.patientmatching.Problem;
 
 public class HillClimber {
 
@@ -12,10 +14,10 @@ public class HillClimber {
 	double bestFit;
 	int maxFes;
 	int fes;
-	PatientMatchingProblem problem;
+	Problem problem;
 	Random rand;
 	
-	public HillClimber(int[] startingSol, int nFes, PatientMatchingProblem pb) {
+	public HillClimber(int[] startingSol, int nFes, Problem pb) {
 		this.rand = new Random();
 		
 		// Initialise solutions
@@ -47,7 +49,6 @@ public class HillClimber {
 			// Mutate current solution and evaluate
 			int[] child = mutation.mutate(this.currentSol);
 			double childfit = this.problem.evaluate(child);
-		
 			// If fitness of new solution is better than current solution, then set it as current solution
 			if(childfit > this.currentFit){
 				System.arraycopy(child, 0, this.currentSol, 0, this.currentSol.length);

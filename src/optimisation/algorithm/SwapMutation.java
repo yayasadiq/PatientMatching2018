@@ -1,6 +1,5 @@
 package optimisation.algorithm;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class SwapMutation extends PermutationMutation{

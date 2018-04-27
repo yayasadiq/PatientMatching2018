@@ -49,7 +49,7 @@ import patientMatching.PatientDescription;
  *
  * @author ss6035
  */
-public class PatientSim implements StandardCBRApplication{
+public class PatientSim  implements StandardCBRApplication {
     
     private Connector connector;
     private CBRCaseBase casebase;
@@ -67,12 +67,14 @@ public class PatientSim implements StandardCBRApplication{
     private List<String> controls;
     private Map<String, Double> controlsSim;
 
-    public PatientSim(String cbPath, String outPath) {
-        this.cbPath = cbPath; 
-        this.outPath = outPath;
-    }    
+  
 
-    @Override
+    public PatientSim(String cbPath, String outPath) {
+		this.cbPath = cbPath;
+		this.outPath = outPath;
+	}
+
+	@Override
     public void configure() throws ExecutionException{
         casesMap = new HashMap();
         connector  = new CsvConnector(cbPath);
@@ -224,19 +226,10 @@ public class PatientSim implements StandardCBRApplication{
 
 	public void writeControls(String outSim) {
 		CSVWriter csvWriter = new CSVWriter(outSim);
-		StringBuilder sb = new StringBuilder();
-        sb.append("id trial patient / id control patient").append(',');
-        for (Map.Entry entry: casesMap.entrySet()) {
-			Object id = entry.getKey();
-			sb.append(id).append(',');
-			controls.add(String.valueOf(id));
-		}		
-        sb.append('\n');
-        try {
-			csvWriter.createCSVWithContent(sb);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+        for (Map.Entry entry: casesMap.entrySet()) {	
+			csvWriter.writeCell(String.valueOf(entry.getKey()));;
 		}
+        csvWriter.newLine();
         System.out.println("Header created");
 	}
     

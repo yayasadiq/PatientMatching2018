@@ -22,6 +22,7 @@ import jcolibri.exception.ExecutionException;
 import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
 import optimisation.patientmatching.PatientMatchingProblem;
+import optimisation.patientmatching.Problem;
 import optimisation.utils.CSVWriter;
 import optimisation.utils.Generator;
 import optimisation.utils.PatientGenerator;
@@ -65,63 +66,49 @@ public class PatientSimMain {
                 queriesMap.put((String)c.getID(), c);
             }
             app.setqCases(qCases);
-            app.writeControls(outSim);
-            double length = qCases.size();
-            try {
-            	double compteur = 0;
-	            for(CBRCase c:qCases){
-					app.writeSimilarities(c, outSim);
-					compteur ++;
-					int progression = (int) ((compteur/length) * 100);
-					System.out.println("Progression : " +  progression + "%");
-	                //app.cycle(c);
-	            }
-			} catch (IOException e) {
-				e.printStackTrace();
+            for(CBRCase c:qCases){
+                app.cycle(c);
+            }
+        
+            double total_sim = app.getTotal_sim();
+            double ave_sim = total_sim/qCases.size();
+            System.out.println("\nAve Sim: "+ave_sim);
+            app.postCycle();
+            
+            controls = app.getRetrievedCases();
+            int numberOfTrialPatients = qCases.size();	
+			int[] startingSolution = new int[numberOfTrialPatients];
+			for(int i=0; i<numberOfTrialPatients; i++){ // Currently set with dummy indices for testing purposes
+				startingSolution[i] = Integer.parseInt(controls.get(i));
 			}
-		}catch(ExecutionException e){
-          System.err.println(e.getMessage());
-      }
-           
-//            double total_sim = app.getTotal_sim();
-//            double ave_sim = total_sim/qCases.size();
-//            System.out.println("\nAve Sim: "+ave_sim);
-//            app.postCycle();
-//            
-//            controls = app.getRetrievedCases();
-//            int numberOfTrialPatients = qCases.size();	
-//			int[] startingSolution = new int[numberOfTrialPatients];
-//			for(int i=0; i<numberOfTrialPatients; i++){ // Currently set with dummy indices for testing purposes
-//				startingSolution[i] = Integer.parseInt(controls.get(i));
-//			}
-//			
-//			PatientMatchingProblem problem = new PatientMatchingProblem(app);
-//			
-//			System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
-//			double evaluateSolution = problem.evaluate(startingSolution);
-//			System.out.println("Initial Solution Fitness: "+ evaluateSolution);
-//			
-//	
-//            int numberOfFitnessEvaluations = 1000;
-//			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
-//			localsearch.evolve();
-//			
-//			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
-//			double localSearchSolution = localsearch.getBestFitness();
-//			System.out.println("Best Fitness: "+localSearchSolution);
-//			
-//			
-//        }catch(ExecutionException e){
-//            System.err.println(e.getMessage());
+			
+			Problem problem = new PatientMatchingProblem(app);
+			
+			System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
+			double evaluateSolution = problem.evaluate(startingSolution);
+			System.out.println("Initial Solution Fitness: "+ evaluateSolution);
+			
+	
+            int numberOfFitnessEvaluations = 1000;
+			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
+			localsearch.evolve();
+			
+			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
+			double localSearchSolution = localsearch.getBestFitness();
+			System.out.println("Best Fitness: "+localSearchSolution);
+			
+			
+        }catch(ExecutionException e){
+            System.err.println(e.getMessage());
+        }
+
 //        }
-//
-////        }
-//		double total_sim = app.getTotal_sim();
-//        System.out.println("\nSimilarities sum : " + total_sim);
-//        double best_total_sim = app.getBest_total_sim();
-//		System.out.println("Best Similarities sum : " + best_total_sim);
-//		System.out.println("Difference : " + String.valueOf(best_total_sim - total_sim));
-		
+		double total_sim = app.getTotal_sim();
+        System.out.println("\nSimilarities sum : " + total_sim);
+        double best_total_sim = app.getBest_total_sim();
+		System.out.println("Best Similarities sum : " + best_total_sim);
+		System.out.println("Difference : " + String.valueOf(best_total_sim - total_sim));
+
     }
 
 	private static void writeResults(String statPath, double evaluateSolution, double localSearchSolution) {

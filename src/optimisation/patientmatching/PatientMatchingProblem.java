@@ -3,7 +3,7 @@ package optimisation.patientmatching;
 import java.util.Random;
 import patientMatching.PatientSim;
 
-public class PatientMatchingProblem {
+public class PatientMatchingProblem implements Problem{
     
     private PatientSim app;
 

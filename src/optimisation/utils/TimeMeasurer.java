@@ -39,9 +39,9 @@ public class TimeMeasurer {
 			for (TimePoint timePoint : timesMeasured) {
 				Double time = (double) timePoint.getTime() / 1000;
 				String percent = formatter.format((time/totalTime) * 100);
-				System.out.println(timePoint.getName() + " : " + time + " s " + "Takes " + percent + "%");
+				System.out.println(timePoint.getName() + " : " + time + "s " + "Takes " + percent + "%");
 			}
-			System.out.println("Total time : " + totalTime);
+			System.out.println("Total time : " + totalTime + "s");
 		}
 	}
 }

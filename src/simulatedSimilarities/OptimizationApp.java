@@ -10,8 +10,8 @@ public class OptimizationApp{
 	
 	private OptimizationConnector optimizationConnector;
 
-	private String[] resultControlId;
-	private String[] trialPatientsId;
+	private List<String> resultControlId;
+	private List<String> trialPatientsId;
 	private List<List<Double>> resultMatrix;
 	
 	private Map<String, Map<String, Double>> trialControlAssociation;
@@ -35,7 +35,7 @@ public class OptimizationApp{
 	public void computeSimilaritiesSum() {
 		 this.simSum = 0;
 		 this.maxSimSum = 0;
-		 int length = trialPatientsId.length;
+		 int length = trialPatientsId.size();
 		 for (int i = 0; i < length; i++) {
 			 simSum += resultMatrix.get(i).get(i);
 			 maxSimSum += Collections.max(resultMatrix.get(i));
@@ -47,7 +47,7 @@ public class OptimizationApp{
 	public void increaseDiff(int nbrIteration) {
 		for (int i = 0; i < nbrIteration; i++) {
 			Random rand = new Random(System.currentTimeMillis());
-			int indice1 = rand.nextInt(trialPatientsId.length);
+			int indice1 = rand.nextInt(trialPatientsId.size());
 			List<Double> lines = resultMatrix.get(indice1);
 			int indice2 = rand.nextInt(lines.size());
 			double amelioratedSim = lines.get(indice2);
@@ -69,7 +69,7 @@ public class OptimizationApp{
 		double[] similarities = new double[solLength];
 
 		for (int i = 0; i < solLength; i++) {
-			similarities[i] = trialControlAssociation.get(trialPatientsId[i]).get(resultControlId[solutions[i]]);
+			similarities[i] = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(solutions[i]));
 		}
 		return similarities;
 	}

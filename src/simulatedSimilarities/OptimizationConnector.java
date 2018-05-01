@@ -15,9 +15,9 @@ public class OptimizationConnector {
 	
 	private CsvConnector connector;
 	
-	private String[] controlPatientsId;
-	private String[] trialPatientsId;
-	private String[] resultControlId;
+	private List<String> controlPatientsId;
+	private List<String> trialPatientsId;
+	private List<String> resultControlId;
 	
 	private Map<String, Map<String, Double>> trialControlAssociation;
 	
@@ -27,7 +27,10 @@ public class OptimizationConnector {
 	
 	public OptimizationConnector(String inPath,String outPath) {
 		this.connector = new CsvConnector(inPath);
-	
+		
+		this.controlPatientsId = new ArrayList<>();
+		this.trialPatientsId = new ArrayList<>();
+		this.resultControlId = new ArrayList<>();
 		this.resultMatrix = new ArrayList<>();
 		
 		this.trialControlAssociation = new HashMap<>();
@@ -39,33 +42,26 @@ public class OptimizationConnector {
 	public void configure() throws FileNotFoundException {
 		List<String[]> data = connector.parse();
 		String[] curLine = data.get(0);
-		int lineLength = curLine.length;
-		this.controlPatientsId = new String[lineLength - 1];
-		for (int i = 1; i < lineLength - 1; i++) {
-			this.controlPatientsId[i - 1] = curLine[i];
+		for (int i = 1; i < curLine.length - 1; i++) {
+			this.controlPatientsId.add(curLine[i]);
 		}
-		
-		int nbrOfLines = data.size();
-		this.trialPatientsId = new String[nbrOfLines - 1];
-		for (int i = 1; i < nbrOfLines; i++) {
+		for (int i = 1; i < data.size(); i++) {
 			curLine = data.get(i);
 			Map<String, Double> sims = new HashMap<>();
-			for (int j = 1; j < lineLength - 1; j++) {
-				sims.put(controlPatientsId[j - 1], Double.valueOf(curLine[j]));
+			for (int j = 1; j < curLine.length - 1; j++) {
+				sims.put(controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
 			}
 			
 			String patientId = curLine[0];
 			
-			trialPatientsId[i - 1] = patientId;
+			trialPatientsId.add(patientId);
 			trialControlAssociation.put(patientId, sims);
 		}
 	}
 
 	public void cycle() {
-		int nbrOfTrial = trialPatientsId.length;
-		resultControlId = new String[nbrOfTrial];
-		for (int i = 0; i < nbrOfTrial ; i++ ) {
-			this.resultControlId[i] = findIndexOfMax(trialControlAssociation.get(trialPatientsId[i]));
+		for (String trialId : trialPatientsId) {
+			this.resultControlId.add(findIndexOfMax(trialControlAssociation.get(trialId)));
 		}
 		writeMatrix();
 	}
@@ -83,7 +79,7 @@ public class OptimizationConnector {
 			csvWriter.writeCell(trialId);
 			List<Double> sims = new ArrayList<>();
 			for(int i = 0; i < counter; i++) {
-				double sim = trialControlAssociation.get(trialId).get(resultControlId[i]);
+				double sim = trialControlAssociation.get(trialId).get(resultControlId.get(i));
 				sims.add(sim);
 				csvWriter.writeCell(nf.format(sim));
 			}
@@ -99,7 +95,7 @@ public class OptimizationConnector {
 		String maxPos = "";
 		for (Map.Entry<String, Double> control_sim : controlMap.entrySet()) {
 			double sim = control_sim.getValue();
-			if (sim > max && !contains(resultControlId, control_sim.getKey())) {
+			if (sim > max && !resultControlId.contains(control_sim.getKey())) {
 				max = sim;
 				maxPos = control_sim.getKey();
 			}
@@ -107,36 +103,20 @@ public class OptimizationConnector {
 		return maxPos;
 	}
 	
-	private boolean contains(String[] resultControlId2, String key) {
-		int nbrOfPatient = resultControlId2.length;
-		int i = 0;
-		String curId = resultControlId2[i];
-		while (curId != null && i < nbrOfPatient) {
-			if (curId.equals(key)) {
-				return true;
-			} 
-			i++;
-			curId = resultControlId2[i];
-		} 
-		return false;
-	}
-
-
-
 	public void mergeMatrixAndData() {
 		for (int i = 0; i < resultMatrix.size(); i++) {
 			List<Double> line = resultMatrix.get(i);
-			String trialId = trialPatientsId[i];
+			String trialId = trialPatientsId.get(i);
 			Map<String, Double> control_sim = trialControlAssociation.get(trialId);
 			for (int j = 0; j < line.size(); j++) {
-				control_sim.put(controlPatientsId[j], line.get(j));
+				control_sim.put(controlPatientsId.get(j), line.get(j));
 			}
 			trialControlAssociation.put(trialId, control_sim);
 		}
 	}
 	
 	public int getNumberSolutions() {
-		return resultControlId.length;
+		return resultControlId.size();
 	}
 
 	public List<List<Double>> getResultMatrix() {
@@ -161,37 +141,37 @@ public class OptimizationConnector {
 
 
 
-	public String[] getControlPatientsId() {
+	public List<String> getControlPatientsId() {
 		return controlPatientsId;
 	}
 
 
 
-	public void setControlPatientsId(String[] controlPatientsId) {
+	public void setControlPatientsId(List<String> controlPatientsId) {
 		this.controlPatientsId = controlPatientsId;
 	}
 
 
 
-	public String[] getTrialPatientsId() {
+	public List<String> getTrialPatientsId() {
 		return trialPatientsId;
 	}
 
 
 
-	public void setTrialPatientsId(String[] trialPatientsId) {
+	public void setTrialPatientsId(List<String> trialPatientsId) {
 		this.trialPatientsId = trialPatientsId;
 	}
 
 
 
-	public String[] getResultControlId() {
+	public List<String> getResultControlId() {
 		return resultControlId;
 	}
 
 
 
-	public void setResultControlId(String[] resultControlId) {
+	public void setResultControlId(List<String> resultControlId) {
 		this.resultControlId = resultControlId;
 	}
 

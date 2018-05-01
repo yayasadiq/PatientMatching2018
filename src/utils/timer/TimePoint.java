@@ -1,4 +1,4 @@
-package optimisation.utils;
+package utils.timer;
 
 public class TimePoint {
 	private String name;

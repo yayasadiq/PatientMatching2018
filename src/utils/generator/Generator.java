@@ -1,6 +1,8 @@
-package optimisation.utils;
+package utils.generator;
 
 import java.io.FileNotFoundException;
+
+import utils.IOhelpers.CSVWriter;
 
 public abstract class Generator {
 	protected String filepath;

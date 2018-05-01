@@ -1,4 +1,4 @@
-package optimisation.utils;
+package utils.generator;
 
 public class Tuple<X,Y> {
 	public final X x; 

@@ -1,4 +1,4 @@
-package optimisation.utils;
+package utils.generator;
 
 import java.io.FileNotFoundException;
 

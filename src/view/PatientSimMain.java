@@ -4,8 +4,6 @@
  */
 package view;
 
-import optimisation.algorithm.HillClimber;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Time;
@@ -21,6 +19,7 @@ import jcolibri.cbrcore.CBRCaseBase;
 import jcolibri.exception.ExecutionException;   
 import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
+import optimisation.localSearch.HillClimber;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.patientmatching.Problem;
 import optimisation.utils.CSVWriter;
@@ -106,8 +105,12 @@ public class PatientSimMain {
 		double total_sim = app.getTotal_sim();
         System.out.println("\nSimilarities sum : " + total_sim);
         double best_total_sim = app.getBest_total_sim();
-		System.out.println("Best Similarities sum : " + best_total_sim);
+		System.out.println("Best similarity greater with a  : " + best_total_sim);
 		System.out.println("Difference : " + String.valueOf(best_total_sim - total_sim));
+		int nbrSwaps = app.getNbrSwaps();
+		System.out.println("Number of possible swaps : " + nbrSwaps);
+		double swapRatio = ((double) nbrSwaps / (double) ((app.getNbrqCases()*app.getNbrCases())/2)) * 100;
+		System.out.println("Rate of the possible swap : " + String.valueOf(swapRatio) + "%");
 
     }
 

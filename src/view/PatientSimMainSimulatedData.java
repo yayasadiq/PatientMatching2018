@@ -11,8 +11,8 @@ import java.util.Scanner;
 import jcolibri.cbrcore.CBRCase;
 import jcolibri.cbrcore.CBRCaseBase;
 import jcolibri.exception.ExecutionException;
-import optimisation.algorithm.HillClimber;
-import optimisation.patientmatching.OptimizationProblem;
+import optimisation.localSearch.HillClimber;
+import optimisation.patientmatching.SimilaritiesManager;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.patientmatching.Problem;
 import optimisation.utils.Generator;
@@ -22,6 +22,7 @@ import optimisation.utils.Utils;
 import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
 import simulatedSimilarities.OptimizationApp;
+import simulatedSimilarities.OptimizationConnector;
 
 public class PatientSimMainSimulatedData {
 	
@@ -38,23 +39,25 @@ public class PatientSimMainSimulatedData {
 		String simulatedSim = parentRep + "SimulatedSim.csv";
 		String outSim = parentRep + "outSim.csv";
 		
-		OptimizationApp app = new OptimizationApp(outSim, simulatedSim);
+		OptimizationConnector optimizationConnector = new OptimizationConnector(outSim, simulatedSim);
 		TimeMeasurer timeMeasurer = new TimeMeasurer();
 		timeMeasurer.startTimer("Total time");
 		
 		timeMeasurer.startTimer("Configure");
 		try {
-			app.configure();
+			optimizationConnector.configure();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Cycle");
-		app.cycle();
+		optimizationConnector.cycle();
 		timeMeasurer.stopTimer();
-		Problem problem = new OptimizationProblem(app);
-		int[] startingSol = new int[app.getNumberSolutions()];
+		
+		OptimizationApp app = new OptimizationApp(optimizationConnector);
+		Problem problem = new SimilaritiesManager(app);
+		int[] startingSol = new int[optimizationConnector.getNumberSolutions()];
 		int solLength = startingSol.length;
 		for (int i = 0; i < solLength; i++) {
 			//put in the solution the position of the controlPatientsId in app
@@ -67,14 +70,6 @@ public class PatientSimMainSimulatedData {
 		timeMeasurer.startTimer("IncreaseDiff");
 		app.increaseDiff(1000000);
 		timeMeasurer.stopTimer();
-		
-		timeMeasurer.startTimer("Merge Matrix");
-		app.mergeMatrixAndData();
-		timeMeasurer.stopTimer();
-
-//		timeMeasurer.startTimer("display Matrix");
-//		app.displayMatrix();
-//		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Local Search");
 		

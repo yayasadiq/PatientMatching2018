@@ -66,6 +66,7 @@ public class PatientSim  implements StandardCBRApplication {
     private double best_total_sim = 0;
     private List<String> controls;
     private Map<String, Double> controlsSim;
+    private int nbrOfPossibleSwaps = 0;
 
   
 
@@ -150,10 +151,23 @@ public class PatientSim  implements StandardCBRApplication {
                 retrievedCases.add((String)rr.get_case().getID());
                 break;
             }
+            this.nbrOfPossibleSwaps ++;
         }
         
     }
-
+    
+    public int getNbrSwaps() {
+    	return this.nbrOfPossibleSwaps;
+    }
+    
+    public int getNbrqCases() {
+    	return this.qCases.size();
+    }
+    
+    public int getNbrCases() {
+    	return this.casesMap.size();
+    }
+    
     public List<String> getRetrievedCases() {
         return retrievedCases;
     }

@@ -1,4 +1,4 @@
-package optimisation.algorithm;
+package optimisation.localSearch;
 
 import java.util.Random;
 

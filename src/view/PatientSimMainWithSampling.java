@@ -4,7 +4,6 @@
  */
 package view;
 
-import optimisation.algorithm.HillClimber;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +16,7 @@ import jcolibri.cbrcore.CBRCaseBase;
 import jcolibri.exception.ExecutionException;   
 import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
+import optimisation.localSearch.HillClimber;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.utils.Utils;
 

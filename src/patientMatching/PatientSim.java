@@ -41,9 +41,9 @@ import jcolibri.method.retrieve.NNretrieval.similarity.local.Interval;
 //import jcolibri.method.retrieve.NNretrieval.similarity.local.Equal;
 import jcolibri.method.retrieve.RetrievalResult;
 import jcolibri.method.retrieve.selection.SelectCases;
-import optimisation.utils.CSVWriter;
 import patientMatching.CsvConnector;
 import patientMatching.PatientDescription;
+import utils.IOhelpers.CSVWriter;
 
 /**
  *

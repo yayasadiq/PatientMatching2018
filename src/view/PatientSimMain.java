@@ -19,13 +19,13 @@ import jcolibri.cbrcore.CBRCaseBase;
 import jcolibri.exception.ExecutionException;   
 import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
+import utils.IOhelpers.CSVWriter;
+import utils.generator.Generator;
+import utils.generator.PatientGenerator;
+import utils.timer.TimeMeasurer;
 import optimisation.localSearch.HillClimber;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.patientmatching.Problem;
-import optimisation.utils.CSVWriter;
-import optimisation.utils.Generator;
-import optimisation.utils.PatientGenerator;
-import optimisation.utils.TimeMeasurer;
 import optimisation.utils.Utils;
 
 /**

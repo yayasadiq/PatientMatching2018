@@ -15,14 +15,15 @@ import optimisation.localSearch.HillClimber;
 import optimisation.patientmatching.SimilaritiesManager;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.patientmatching.Problem;
-import optimisation.utils.Generator;
-import optimisation.utils.PatientGenerator;
-import optimisation.utils.TimeMeasurer;
 import optimisation.utils.Utils;
 import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
 import simulatedSimilarities.OptimizationApp;
 import simulatedSimilarities.OptimizationConnector;
+import utils.IOhelpers.InputManager;
+import utils.generator.Generator;
+import utils.generator.PatientGenerator;
+import utils.timer.TimeMeasurer;
 
 public class PatientSimMainSimulatedData {
 	
@@ -33,9 +34,7 @@ public class PatientSimMainSimulatedData {
 	public static void main(String[] args) {
 
 		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
-		String cbPath = parentRep + "Controls.csv"; 
-		String qPath = parentRep + "Cases.csv";
-		String outPath = parentRep + "Output.csv";
+		String modificationPath = parentRep + "ModifiedSim.csv";
 		String simulatedSim = parentRep + "SimulatedSim.csv";
 		String outSim = parentRep + "outSim.csv";
 		
@@ -66,10 +65,18 @@ public class PatientSimMainSimulatedData {
 		System.out.println("Initial Solution: "+Utils.tableToString(startingSol,","));
 		double evaluateSolution = problem.evaluate(startingSol);
 		System.out.println("Initial Solution Fitness: "+ evaluateSolution);
-		
+				
 		timeMeasurer.startTimer("IncreaseDiff");
-		app.increaseDiff(1000000);
+		app.increaseDiffAuto(1500);
 		timeMeasurer.stopTimer();
+		
+		System.out.println("Is that ok for you ?");
+		System.out.println("Do you want to save those informations ? y/n");
+		if (InputManager.enterChar() == 'y') {
+			app.mergeMatrixAndData();
+			optimizationConnector.writeData(modificationPath);
+		}			
+		
 		
 		timeMeasurer.startTimer("Local Search");
 		

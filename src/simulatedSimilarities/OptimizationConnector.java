@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.CsvConnector;
-import optimisation.utils.CSVWriter;
+import utils.IOhelpers.CSVWriter;
 
 public class OptimizationConnector {
 
@@ -191,5 +191,16 @@ public class OptimizationConnector {
 
 	public void setResultMatrix(List<List<Double>> resultMatrix) {
 		this.resultMatrix = resultMatrix;
+	}
+
+
+
+	public void writeData(String fileName) {
+		CSVWriter csvWriter = new CSVWriter(fileName);
+        for (String controlId: resultControlId) {	
+			csvWriter.writeCell(controlId);;
+		}
+        csvWriter.newLine();
+        System.out.println("Header created");		
 	}
 }

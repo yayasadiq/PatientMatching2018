@@ -11,6 +11,7 @@ import java.util.Scanner;
 import jcolibri.cbrcore.CBRCase;
 import jcolibri.cbrcore.CBRCaseBase;
 import jcolibri.exception.ExecutionException;
+import optimisation.fullSearch.FullSearch;
 import optimisation.localSearch.HillClimber;
 import optimisation.patientmatching.SimilaritiesManager;
 import optimisation.patientmatching.PatientMatchingProblem;
@@ -37,6 +38,8 @@ public class PatientSimMainSimulatedData {
 		String modificationPath = parentRep + "ModifiedSim.csv";
 		String simulatedSim = parentRep + "SimulatedSim.csv";
 		String outSim = parentRep + "outSim.csv";
+
+		
 		
 		OptimizationConnector optimizationConnector = new OptimizationConnector(outSim, simulatedSim);
 		TimeMeasurer timeMeasurer = new TimeMeasurer();
@@ -66,21 +69,11 @@ public class PatientSimMainSimulatedData {
 		double evaluateSolution = problem.evaluate(startingSol);
 		System.out.println("Initial Solution Fitness: "+ evaluateSolution);
 				
-		timeMeasurer.startTimer("IncreaseDiff");
+//		timeMeasurer.startTimer("IncreaseDiff");
 		app.increaseDiffAuto(1500);
-		timeMeasurer.stopTimer();
-		
-		System.out.println("Is that ok for you ?");
-		System.out.println("Do you want to save those informations ? y/n");
-		if (InputManager.enterChar() == 'y') {
-			app.mergeMatrixAndData();
-			optimizationConnector.writeData(modificationPath);
-		}			
-		
+//		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Local Search");
-		
-		
 		int nFes = 100000;
 		
 		HillClimber localsearch = new HillClimber(startingSol , nFes , problem);
@@ -90,7 +83,17 @@ public class PatientSimMainSimulatedData {
 		double localSearchSolution = localsearch.getBestFitness();
 		System.out.println("Best Fitness: "+localSearchSolution);
 		timeMeasurer.stopTimer();
+		
+		timeMeasurer.startTimer("Full Search");
+		FullSearch fullSearch = new FullSearch(optimizationConnector);
+		fullSearch.optimize();
 		timeMeasurer.stopTimer();
+		
+		timeMeasurer.stopTimer();
+		app.setResultMatrix(optimizationConnector.getResultMatrix());
+		app.computeSimilaritiesSum();
+	
 		timeMeasurer.displayTimes();
 	}
+
 }

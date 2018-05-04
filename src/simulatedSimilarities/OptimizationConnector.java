@@ -42,13 +42,14 @@ public class OptimizationConnector {
 	public void configure() throws FileNotFoundException {
 		List<String[]> data = connector.parse();
 		String[] curLine = data.get(0);
-		for (int i = 1; i < curLine.length - 1; i++) {
+		int lineLength = curLine.length - 1;
+		for (int i = 1; i < lineLength; i++) {
 			this.controlPatientsId.add(curLine[i]);
 		}
 		for (int i = 1; i < data.size(); i++) {
 			curLine = data.get(i);
 			Map<String, Double> sims = new HashMap<>();
-			for (int j = 1; j < curLine.length - 1; j++) {
+			for (int j = 1; j < lineLength; j++) {
 				sims.put(controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
 			}
 			
@@ -109,7 +110,7 @@ public class OptimizationConnector {
 			String trialId = trialPatientsId.get(i);
 			Map<String, Double> control_sim = trialControlAssociation.get(trialId);
 			for (int j = 0; j < line.size(); j++) {
-				control_sim.put(controlPatientsId.get(j), line.get(j));
+				control_sim.put(resultControlId.get(j), line.get(j));
 			}
 			trialControlAssociation.put(trialId, control_sim);
 		}
@@ -133,67 +134,45 @@ public class OptimizationConnector {
 		return connector;
 	}
 
-
-
 	public void setConnector(CsvConnector connector) {
 		this.connector = connector;
 	}
-
-
 
 	public List<String> getControlPatientsId() {
 		return controlPatientsId;
 	}
 
-
-
 	public void setControlPatientsId(List<String> controlPatientsId) {
 		this.controlPatientsId = controlPatientsId;
 	}
-
-
 
 	public List<String> getTrialPatientsId() {
 		return trialPatientsId;
 	}
 
-
-
 	public void setTrialPatientsId(List<String> trialPatientsId) {
 		this.trialPatientsId = trialPatientsId;
 	}
-
-
 
 	public List<String> getResultControlId() {
 		return resultControlId;
 	}
 
-
-
 	public void setResultControlId(List<String> resultControlId) {
 		this.resultControlId = resultControlId;
 	}
-
-
 
 	public Map<String, Map<String, Double>> getTrialControlAssociation() {
 		return trialControlAssociation;
 	}
 
-
-
 	public void setTrialControlAssociation(Map<String, Map<String, Double>> trialControlAssociation) {
 		this.trialControlAssociation = trialControlAssociation;
 	}
 
-
-
 	public void setResultMatrix(List<List<Double>> resultMatrix) {
 		this.resultMatrix = resultMatrix;
 	}
-
-
 
 	public void writeData(String fileName) {
 		CSVWriter csvWriter = new CSVWriter(fileName);
@@ -202,5 +181,38 @@ public class OptimizationConnector {
 		}
         csvWriter.newLine();
         System.out.println("Header created");		
+	}
+
+	public double evaluate(int i, int j, double val, Double chosenSim) {
+		Double newVal = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId.get(i));
+		Double otherCurDiagSim = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId.get(j));
+		double newSims = val + newVal;
+		double oldSims = chosenSim + otherCurDiagSim;
+		if( newSims > oldSims) {
+			return newSims;
+		} else {
+			return -1;
+		}
+	}
+
+	public void makeChanges(Integer x, Integer y) {
+		String tempId;
+		
+		tempId = resultControlId.get(x);
+		resultControlId.set(x, resultControlId.get(y));
+		resultControlId.set(y, tempId);
+		int nbrOfTrial = trialPatientsId.size();
+		for (int i = x; i < nbrOfTrial; i++) {
+			List<Double> line = resultMatrix.get(i);
+			Double newSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(x));
+			line.set(x, newSim);
+			resultMatrix.set(i, line);
+		}
+		for (int i = y; i < nbrOfTrial; i++) {
+			List<Double> line = resultMatrix.get(i);
+			Double newSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(y));
+			line.set(y, newSim);
+			resultMatrix.set(i, line);
+		}
 	}
 }

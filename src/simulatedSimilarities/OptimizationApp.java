@@ -39,6 +39,7 @@ public class OptimizationApp{
 			 simSum += resultMatrix.get(i).get(i);
 			 maxSimSum += getOptimalSwap(resultMatrix.get(i));
 		 }
+		 System.out.println('\n');
 		 System.out.println("simSum : " + simSum);
 		 System.out.println("maxSimSum : " + maxSimSum);
 		 System.out.println("Difference : " + String.valueOf(maxSimSum - simSum));
@@ -66,9 +67,9 @@ public class OptimizationApp{
 	}
 	private int getNumberOfSwaps(List<Double> list) {
 		int nbrOfSwap = 0;
-		double choosenSim = list.get(list.size() - 1);
+		double chosenSim = list.get(list.size() - 1);
 		for (Double sim : list) {
-			if (choosenSim < sim) {
+			if (chosenSim < sim) {
 				nbrOfSwap ++;
 			}
 		}
@@ -80,7 +81,7 @@ public class OptimizationApp{
 		computeSimilaritiesSum();
 		//In nbrOfSwaps we could have some similarities that are removed in reduceTotalSwap
 		int totalMaxSwap = - nbrOfSwaps + (trialSize * (trialSize + 1))/2 ;
-		totalMaxSwap = reduceTotalSwap(totalMaxSwap);
+		totalMaxSwap = reduceNumberOfSwaps(totalMaxSwap);
 		if (totalMaxSwap > nbrOfSwapsNeeded) {
 			Random rand = new Random();
 			while (nbrOfSwaps < nbrOfSwapsNeeded) {
@@ -88,12 +89,12 @@ public class OptimizationApp{
 				List<Double> line = resultMatrix.get(indiceLine);
 				int lineSize = line.size() - 1;
 				int indiceColumn = rand.nextInt(lineSize);
-				double choosenSim = line.get(lineSize);
-				if (choosenSim < 1) {
-					if (choosenSim < line.get(indiceColumn)) {
+				double chosenSim = line.get(lineSize);
+				if (chosenSim < 1) {
+					if (chosenSim < line.get(indiceColumn)) {
 						changeNextAmeliorableSim( indiceLine,  indiceColumn,  rand);
 					} else {
-						ameliorateSim(rand, indiceLine, line, indiceColumn, choosenSim);
+						ameliorateSim(rand, indiceLine, line, indiceColumn, chosenSim);
 					}
 					nbrOfSwaps++;
 				}
@@ -102,9 +103,10 @@ public class OptimizationApp{
 			throw new IllegalArgumentException("The number of swaps asked is more than the number of possible swaps (" + totalMaxSwap +")");
 		}
 		computeSimilaritiesSum();
+		optimizationConnector.mergeMatrixAndData();
 	}
 
-	private int reduceTotalSwap(int totalMaxSwap) {
+	private int reduceNumberOfSwaps(int totalMaxSwap) {
 		for ( List<Double> line : resultMatrix) {
 			if (line.get(line.size()-1)>=1.0) {
 				totalMaxSwap -= line.size() - 1;
@@ -113,17 +115,21 @@ public class OptimizationApp{
 		return totalMaxSwap;
 	}
 
-	private void ameliorateSim(Random rand, int indiceLine, List<Double> line, int indiceColumn, double choosenSim) {
-		double amelioratedSim = choosenSim + (1-choosenSim) * rand.nextDouble();
+	private void ameliorateSim(Random rand, int indiceLine, List<Double> line, int indiceColumn, double chosenSim) {
+		double amelioratedSim = chosenSim + (1-chosenSim) * rand.nextDouble();
 		line.set(indiceColumn, amelioratedSim);
 		resultMatrix.set(indiceLine, line);
 	}
 	
+	public void setResultMatrix(List<List<Double>> resultMatrix) {
+		this.resultMatrix = resultMatrix;
+	}
+
 	private void changeNextAmeliorableSim(int indiceLine, int indiceColumn, Random rand) {
 		int nbrOfLines = resultMatrix.size();
 		int i = indiceLine;
 		int j = 0;
-		double choosenSim = 0;
+		double chosenSim = 0;
 		int lineSize = 0;
 		List<Double> line = null;
 		int currentColumn = 0;
@@ -134,13 +140,13 @@ public class OptimizationApp{
 			currentLine = (i % (nbrOfLines - 1))+ 1;
 			line = resultMatrix.get(currentLine);
 			lineSize = line.size() - 1;
-			choosenSim = line.get(lineSize);
-			if (choosenSim < 1) {
+			chosenSim = line.get(lineSize);
+			if (chosenSim < 1) {
 				j = indiceColumn;
 				int initialColumnPointPlusSize = lineSize + indiceColumn;
 				while (j < initialColumnPointPlusSize && !hasFound) {
 					currentColumn = j % lineSize;
-					if (line.get(currentColumn) < choosenSim) {
+					if (line.get(currentColumn) < chosenSim) {
 						hasFound = true;
 					} 
 					j++;															
@@ -149,7 +155,7 @@ public class OptimizationApp{
 			i++;
 		}
 		if (hasFound) {
-			ameliorateSim(rand, currentLine , line, currentColumn, choosenSim);
+			ameliorateSim(rand, currentLine , line, currentColumn, chosenSim);
 		} else {
 			throw new NullPointerException("There is no more similities available");
 		}
@@ -161,9 +167,9 @@ public class OptimizationApp{
 			List<Double> line = resultMatrix.get(i);
 			int numberOfSwaps = getNumberOfSwaps(line);
 			int maxNumberOfPossibleSwaps = line.size() - 1;
-			double choosenSim = line.get(maxNumberOfPossibleSwaps);
+			double chosenSim = line.get(maxNumberOfPossibleSwaps);
 			System.out.println("This line contains " + numberOfSwaps + " possible swaps on " + maxNumberOfPossibleSwaps);
-			System.out.println("The choosen similarity is : " + choosenSim);
+			System.out.println("The chosen similarity is : " + chosenSim);
 			System.out.println("Do you want to augment this value ? y/n");
 			char enteredChar = InputManager.enterChar();
 			
@@ -182,13 +188,14 @@ public class OptimizationApp{
 					continue;
 				}
 				Random rand = new Random();
-				line.set(j, choosenSim + (1-choosenSim) * rand .nextDouble());
+				line.set(j, chosenSim + (1-chosenSim) * rand .nextDouble());
 				numberOfSwaps ++;
 				System.out.println("Ajouté");
 			}
 			resultMatrix.set(i, line);
 			computeSimilaritiesSum();
 		}
+		optimizationConnector.mergeMatrixAndData();
 		
 	}
 	public double[] getSimilarities(int[] solutions) {
@@ -200,11 +207,5 @@ public class OptimizationApp{
 		}
 		return similarities;
 	}
-
-	public void mergeMatrixAndData() {
-		optimizationConnector.setResultMatrix(resultMatrix);
-		optimizationConnector.mergeMatrixAndData();
-	}
-
 
 }

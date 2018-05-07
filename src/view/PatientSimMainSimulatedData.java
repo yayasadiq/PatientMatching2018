@@ -34,11 +34,9 @@ public class PatientSimMainSimulatedData {
 
 	public static void main(String[] args) {
 
-		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Tests/";
-		String modificationPath = parentRep + "ModifiedSim.csv";
-		String simulatedSim = parentRep + "resMat.csv";
-		String outSim = parentRep + "test.csv";
-		String outSim2 = parentRep + "resMatAfterFS.csv";
+		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
+		String simulatedSim = parentRep + "SimulatedSim.csv";
+		String outSim = parentRep + "outSim.csv";
 
 		
 		
@@ -71,7 +69,7 @@ public class PatientSimMainSimulatedData {
 		System.out.println("Initial Solution Fitness: "+ evaluateSolution);
 				
 //		timeMeasurer.startTimer("IncreaseDiff");
-		app.increaseDiffAuto(0);
+		app.increaseDiffAuto(1000);
 //		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Local Search");
@@ -82,19 +80,18 @@ public class PatientSimMainSimulatedData {
 		
 		System.out.println("\nBest Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
 		double localSearchSolution = localsearch.getBestFitness();
-		System.out.println("Best Fitness: "+localSearchSolution);
+		System.out.println("Best Fitness: "+ localSearchSolution);
 		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Full Search");
 		FullSearch fullSearch = new FullSearch(optimizationConnector);
 		fullSearch.optimize();
 		timeMeasurer.stopTimer();
-		
 		timeMeasurer.stopTimer();
 		app.setResultMatrix(optimizationConnector.getResultMatrix());
 		app.computeSimilaritiesSum();
-		optimizationConnector.writeMatrix(outSim2);
-	
+		app.displaySimilaritiesStat();
+		System.out.println("\nBest Fitness after Full Search : " + String.valueOf(app.getSimSum() /optimizationConnector.getNumberSolutions()));
 		timeMeasurer.displayTimes();
 	}
 	

@@ -1,6 +1,7 @@
 package simulatedSimilarities;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,11 +65,11 @@ public class OptimizationConnector {
 		for (String trialId : trialPatientsId) {
 			this.resultControlId.add(findIndexOfMax(trialControlAssociation.get(trialId)));
 		}
-		writeMatrix();
+		writeMatrix(outPath);
 	}
 
-	private void writeMatrix() {
-		CSVWriter csvWriter = new CSVWriter(outPath);
+	public void writeMatrix(String filePath) {
+		CSVWriter csvWriter = new CSVWriter(filePath);
 		csvWriter.writeCell("Trial/Control");
 		for (String string : resultControlId) {
 			csvWriter.writeCell(string);
@@ -88,7 +89,11 @@ public class OptimizationConnector {
 			csvWriter.newLine();
 			counter ++;
 		}
-		csvWriter.endFile();
+		try {
+			csvWriter.createCSVWithContent();;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private String findIndexOfMax(Map<String, Double> controlMap) {

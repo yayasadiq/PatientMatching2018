@@ -222,24 +222,19 @@ public class PatientSim  implements StandardCBRApplication {
 		return best_total_sim;
 	}
 
-	public void writeSimilarities(CBRCase c, String path) throws IOException {
-		CSVWriter csvWriter = new CSVWriter(path);
+	public void writeSimilarities(CBRCase c, CSVWriter csvWriter) throws IOException {
 		Collection<RetrievalResult> result = NNScoringMethod.evaluateSimilarity(casebase.getCases(), c, nnConfig);
         Collection<RetrievalResult> retievedCases = SelectCases.selectAllRR(result);
-		StringBuilder sb = new StringBuilder();
-		sb.append(c.getID()).append(',');       
         for (RetrievalResult retrievalResult : retievedCases) {
 			controlsSim.put((String)retrievalResult.get_case().getID(), retrievalResult.getEval());
 		}
         for (String string : controls) {
-			sb.append(controlsSim.get(string)).append(',');			
+			csvWriter.writeCell(String.valueOf(controlsSim.get(string)));			
 		}
-        sb.append('\n');
-        csvWriter.addLignesToFile(sb);
+        csvWriter.newLine();
 	}
 
-	public void writeControls(String outSim) {
-		CSVWriter csvWriter = new CSVWriter(outSim);
+	public void writeControls(CSVWriter csvWriter) {
         for (Map.Entry entry: casesMap.entrySet()) {	
 			csvWriter.writeCell(String.valueOf(entry.getKey()));;
 		}

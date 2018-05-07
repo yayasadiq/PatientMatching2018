@@ -20,58 +20,37 @@ public class CSVWriter {
     }
     
     
-    public void createCSVWithContent(StringBuilder sb) throws FileNotFoundException {
+    public void createCSVWithContent() throws FileNotFoundException {
     	PrintWriter pw = new PrintWriter(file);
     	pw.write(sb.toString());
         pw.close();
     }
-    
-    public void addLignesToFile(StringBuilder sb) throws IOException {
-    	if (file.exists()) {
-			FileWriter fw = new FileWriter(this.filepath,true);
-	    	fw.write(sb.toString());
-	    	fw.close();
-		} else {
-			this.createCSVWithContent(sb);
-		}
-    	
-    }
-    
-    public void writeHeaderWithControls(ArrayList<String> controls) {
-    	StringBuilder sb = new StringBuilder();
-        sb.append("id trial patient / id control patient").append(',');
-        for (String string : controls) {
-        	sb.append(string).append(',');			
-		}
-        sb.append('\n');
-        try {
-			this.createCSVWithContent(sb);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-        System.out.println("Header created");
-    }
-    
+       
     
 	public void setFilepath(String filepath) {
 		this.filepath = filepath;
 		this.file = new File(filepath); 
 	}
 	
-	public void writeCell(String cell) {
-		this.sb.append(cell).append(',');
+	public <T> void writeCell(T cell) {
+		this.sb.append(String.valueOf(cell)).append(',');
 	}
 	
 	public void newLine() {
 		this.sb.append('\n');
 	}
 	
-	public void endFile() {
-		try {
-			this.createCSVWithContent(sb);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void endFile() throws IOException {
+		if (file.exists()) {
+			FileWriter fw = new FileWriter(this.filepath,true);
+	    	fw.write(sb.toString());
+	    	fw.close();
+		} else {
+			this.createCSVWithContent();
 		}
+	}
+	
+	public void addLines(String string) {
+		sb.append(string);
 	}
 }

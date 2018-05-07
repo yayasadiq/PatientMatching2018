@@ -39,13 +39,7 @@ public class OptimizationApp{
 			 simSum += resultMatrix.get(i).get(i);
 			 maxSimSum += getOptimalSwap(resultMatrix.get(i));
 		 }
-		 System.out.println('\n');
-		 System.out.println("simSum : " + simSum);
-		 System.out.println("maxSimSum : " + maxSimSum);
-		 System.out.println("Difference : " + String.valueOf(maxSimSum - simSum));
-		 System.out.println("Number of swap : " + nbrOfSwaps);
-		 double swapRatio = ((double) nbrOfSwaps / (double) ((nbrOfTrial * resultControlId.size() /2)) * 100);
-		 System.out.println("Frequence of swap : " + swapRatio + "%");
+
 	}
 
 	private double getOptimalSwap(List<Double> list) {
@@ -65,7 +59,7 @@ public class OptimizationApp{
 		}
 		return max;
 	}
-	private int getNumberOfSwaps(List<Double> list) {
+	public int getNumberOfSwapsOnALine(List<Double> list) {
 		int nbrOfSwap = 0;
 		double chosenSim = list.get(list.size() - 1);
 		for (Double sim : list) {
@@ -80,9 +74,9 @@ public class OptimizationApp{
 		int trialSize = trialPatientsId.size() - 1;
 		computeSimilaritiesSum();
 		//In nbrOfSwaps we could have some similarities that are removed in reduceTotalSwap
-		int totalMaxSwap = - nbrOfSwaps + (trialSize * (trialSize + 1))/2 ;
+		int totalMaxSwap = (trialSize * (trialSize + 1))/2 ;
 		totalMaxSwap = reduceNumberOfSwaps(totalMaxSwap);
-		if (totalMaxSwap > nbrOfSwapsNeeded) {
+		if (totalMaxSwap >= nbrOfSwapsNeeded) {
 			Random rand = new Random();
 			while (nbrOfSwaps < nbrOfSwapsNeeded) {
 				int indiceLine = rand.nextInt(trialSize) + 1;
@@ -165,7 +159,7 @@ public class OptimizationApp{
 		int nbrOflines = resultMatrix.size();
 		for (int i = 0; i < nbrOflines; i++) {
 			List<Double> line = resultMatrix.get(i);
-			int numberOfSwaps = getNumberOfSwaps(line);
+			int numberOfSwaps = getNumberOfSwapsOnALine(line);
 			int maxNumberOfPossibleSwaps = line.size() - 1;
 			double chosenSim = line.get(maxNumberOfPossibleSwaps);
 			System.out.println("This line contains " + numberOfSwaps + " possible swaps on " + maxNumberOfPossibleSwaps);
@@ -201,11 +195,32 @@ public class OptimizationApp{
 	public double[] getSimilarities(int[] solutions) {
 		int solLength = solutions.length;
 		double[] similarities = new double[solLength];
-
 		for (int i = 0; i < solLength; i++) {
 			similarities[i] = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(solutions[i]));
 		}
 		return similarities;
+	}
+	
+	public void displaySimilaritiesStat() {
+		 System.out.println('\n');
+		 System.out.println("simSum : " + simSum);
+		 System.out.println("maxSimSum : " + maxSimSum);
+		 System.out.println("Difference : " + String.valueOf(maxSimSum - simSum));
+		 System.out.println("Number of swap : " + nbrOfSwaps);
+		 double swapRatio = ((double) nbrOfSwaps / (double) ((trialPatientsId.size() * resultControlId.size() /2)) * 100);
+		 System.out.println("Frequence of swap : " + swapRatio + "%");
+	}
+
+	public double getSimSum() {
+		return simSum;
+	}
+
+	public double getMaxSimSum() {
+		return maxSimSum;
+	}
+
+	public int getNbrOfSwaps() {
+		return nbrOfSwaps;
 	}
 
 }

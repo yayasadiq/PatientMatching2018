@@ -36,13 +36,13 @@ public class PatientSimMain {
     
     private static final int NUMBER_TRIAL_PATIENT = 70;
 	private static final int NUMBER_CONTROL_PATIENT = 33000;
+	private static final String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
+	private static final String cbPath = dirPath + "Controls.csv"; 
+	private static final String qPath = dirPath + "Cases.csv";
+	private static final String outPath = dirPath + "Output.csv";
+	private static final String outSim = dirPath + "outSim.csv";
 
 	public static void main(String[] args) {
-		String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
-    	String cbPath = dirPath + "Controls.csv"; 
-        String qPath = dirPath + "Cases.csv";
-        String outPath = dirPath + "Output.csv";
-        String outSim = dirPath + "outSim.csv";
         PatientSim app = new PatientSim(cbPath, outPath);
         List<String> controls = new ArrayList();
         
@@ -114,18 +114,9 @@ public class PatientSimMain {
 
     }
 
-	private static void writeResults(String statPath, double evaluateSolution, double localSearchSolution) {
-		CSVWriter csvWriter = new CSVWriter(statPath);
-		StringBuilder sb = computeAndDisplayARecapOfTheTests(statPath, evaluateSolution, localSearchSolution);		
-		
-		try {
-			csvWriter.addLignesToFile(sb);
-		} catch (IOException e) {
-			System.err.println("Can't write the folder\n" + e.getMessage());
-		}
-	}
+	
 
-	private static void generatePatients(String cbPath, String qPath) {
+	private static void generatePatients() {
 		try {
         	Generator generator = new PatientGenerator(cbPath);
         	generator.makeData(NUMBER_CONTROL_PATIENT);
@@ -136,33 +127,28 @@ public class PatientSimMain {
         }
 	}
 
-	private static StringBuilder createRecapLigne(double evaluateSolution, double localSearchSolution, double averageDif,
+	private static void createRecapLigne(double evaluateSolution, double localSearchSolution, double averageDif,
 			double currentDif) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Starting solution :");
-		sb.append(',');
-		sb.append(evaluateSolution);
-		sb.append(',');
-		sb.append("Local search solution :");
-		sb.append(',');
-		sb.append(localSearchSolution);
-		sb.append(',');
-		sb.append("Difference :");
-		sb.append(',');
-		sb.append(currentDif);
-		sb.append(',');
-		sb.append("Average difference :");
-		sb.append(',');
-		sb.append(averageDif);
-		sb.append(',');
-		sb.append("Number of control patients");
-		sb.append(',');
-		sb.append(NUMBER_CONTROL_PATIENT);
-		sb.append('\n');
-		return sb;
+		CSVWriter csvWriter = new CSVWriter(outSim);
+		csvWriter.writeCell("Starting solution :");
+		csvWriter.writeCell(String.valueOf(evaluateSolution));
+		csvWriter.writeCell("Local search solution :");
+		csvWriter.writeCell(String.valueOf(localSearchSolution));
+		csvWriter.writeCell("Difference :");
+		csvWriter.writeCell(String.valueOf(currentDif));
+		csvWriter.writeCell("Average difference :");
+		csvWriter.writeCell(String.valueOf(averageDif));
+		csvWriter.writeCell("Number of control patients");
+		csvWriter.writeCell(String.valueOf(NUMBER_CONTROL_PATIENT));
+		csvWriter.newLine();
+		try {
+			csvWriter.endFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	public static StringBuilder computeAndDisplayARecapOfTheTests(String statPath, double evaluateSolution, double localSearchSolution) {
+
+	public static void computeAndDisplayARecapOfTheTests(String statPath, double evaluateSolution, double localSearchSolution) {
 		CsvConnector connStat = new CsvConnector(statPath);
 		List<String[]> datas = new ArrayList<>();
 		try {				
@@ -197,7 +183,7 @@ public class PatientSimMain {
 		System.out.println("Average of the difference : " + averageDif);
 		System.out.println("Average of the starting solution : " + averageEvalSol);
 		System.out.println("Average of the local search : " + averageLocalSol);
-		return createRecapLigne(evaluateSolution, localSearchSolution, averageDif, currentDif);
+		createRecapLigne(evaluateSolution, localSearchSolution, averageDif, currentDif);
 	}
 	
     

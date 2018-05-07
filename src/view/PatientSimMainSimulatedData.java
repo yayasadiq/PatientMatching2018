@@ -34,10 +34,11 @@ public class PatientSimMainSimulatedData {
 
 	public static void main(String[] args) {
 
-		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
+		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/Tests/";
 		String modificationPath = parentRep + "ModifiedSim.csv";
-		String simulatedSim = parentRep + "SimulatedSim.csv";
-		String outSim = parentRep + "outSim.csv";
+		String simulatedSim = parentRep + "resMat.csv";
+		String outSim = parentRep + "test.csv";
+		String outSim2 = parentRep + "resMatAfterFS.csv";
 
 		
 		
@@ -70,7 +71,7 @@ public class PatientSimMainSimulatedData {
 		System.out.println("Initial Solution Fitness: "+ evaluateSolution);
 				
 //		timeMeasurer.startTimer("IncreaseDiff");
-		app.increaseDiffAuto(1500);
+		app.increaseDiffAuto(0);
 //		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Local Search");
@@ -92,8 +93,11 @@ public class PatientSimMainSimulatedData {
 		timeMeasurer.stopTimer();
 		app.setResultMatrix(optimizationConnector.getResultMatrix());
 		app.computeSimilaritiesSum();
+		optimizationConnector.writeMatrix(outSim2);
 	
 		timeMeasurer.displayTimes();
 	}
+	
+	
 
 }

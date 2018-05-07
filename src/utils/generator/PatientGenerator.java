@@ -11,36 +11,29 @@ public class PatientGenerator extends Generator {
 	}
 	
 	public void makeData(int nbrLignes) throws FileNotFoundException {
-        StringBuilder sb = new StringBuilder();
         Random rand = new Random();
         int cursor = 2;
-        
-        sb.append(TITLES);
+        csvWriter.addLines(TITLES);
         for (int i = 0; i < nbrLignes; i++) {
-			sb.append(i);
-			sb.append(',');
-			sb.append(rand.nextInt(50));
-			sb.append(',');
+			csvWriter.writeCell(i);
+			csvWriter.writeCell(rand.nextInt(50));
 			while(cursor < 15) {
-				sb.append(rand.nextInt(5) + 1);
-				sb.append(',');
+				csvWriter.writeCell(rand.nextInt(5) + 1);
 				cursor = cursor + 1;
 			}
 			while(cursor < 27) {
-				sb.append(rand.nextInt(3) + 1);
-				sb.append(',');
+				csvWriter.writeCell(rand.nextInt(3) + 1);
 				cursor = cursor + 1;
 			}
 			while(cursor < 164) {
-				sb.append(rand.nextInt(2));
-				sb.append(',');
+				csvWriter.writeCell(rand.nextInt(2));
 				cursor = cursor + 1;
 			}
-			sb.append(rand.nextInt(1));
-			sb.append('\n');
+			csvWriter.writeCell(rand.nextInt(1));
+			csvWriter.newLine();
 			cursor = 2;
 		}
-        this.csvWriter.createCSVWithContent(sb);
+        csvWriter.createCSVWithContent();
         System.out.println("CVS generated");
     }
 

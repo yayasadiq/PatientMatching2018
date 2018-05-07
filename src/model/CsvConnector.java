@@ -50,22 +50,8 @@ public class CsvConnector implements Connector{
             }
         }catch(IOException e){
             System.err.println(e.getMessage());
-        }
+        } 
         return data;      
-    }
-    
-    public static void main(String[] args){        
-        String filepath = "C:\\OneDrive\\PostDoc\\Nirmalie\\PatientData\\Cases.csv";       
-        try{
-            CsvConnector c = new CsvConnector(filepath);
-            List<String[]> data = c.parse();
-            String[] header = data.get(0);
-            for(int i=0; i<header.length;i++){
-                System.out.print(header[i]);
-            }
-        }catch(IOException e){
-            System.err.println(e.getMessage());
-        }
     }
 
     @Override

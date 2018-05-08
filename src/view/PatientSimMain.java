@@ -45,9 +45,11 @@ public class PatientSimMain {
 	public static void main(String[] args) {
         PatientSim app = new PatientSim(cbPath, outPath);
         List<String> controls = new ArrayList();
-        
+        TimeMeasurer timeMeasurer = new TimeMeasurer();
+        timeMeasurer.startTimer("Total");
         
 		try{
+			timeMeasurer.startTimer("Configure");
             app.configure();
             CBRCaseBase caseBase = app.preCycle();
             Collection<CBRCase> cases = caseBase.getCases();
@@ -65,15 +67,17 @@ public class PatientSimMain {
                 queriesMap.put((String)c.getID(), c);
             }
             app.setqCases(qCases);
+            timeMeasurer.stopTimer();
+            timeMeasurer.startTimer("Cycle");
             for(CBRCase c:qCases){
                 app.cycle(c);
             }
-        
+            timeMeasurer.stopTimer();
             double total_sim = app.getTotal_sim();
             double ave_sim = total_sim/qCases.size();
             System.out.println("\nAve Sim: "+ave_sim);
             app.postCycle();
-            
+            timeMeasurer.startTimer("Evaluate Solution");
             controls = app.getRetrievedCases();
             int numberOfTrialPatients = qCases.size();	
 			int[] startingSolution = new int[numberOfTrialPatients];
@@ -86,8 +90,8 @@ public class PatientSimMain {
 			System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
 			double evaluateSolution = problem.evaluate(startingSolution);
 			System.out.println("Initial Solution Fitness: "+ evaluateSolution);
-			
-	
+			timeMeasurer.stopTimer();
+			timeMeasurer.startTimer("Local Search");
             int numberOfFitnessEvaluations = 1000;
 			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
 			localsearch.evolve();
@@ -96,7 +100,7 @@ public class PatientSimMain {
 			double localSearchSolution = localsearch.getBestFitness();
 			System.out.println("Best Fitness: "+localSearchSolution);
 			
-			
+			timeMeasurer.stopTimer();
         }catch(ExecutionException e){
             System.err.println(e.getMessage());
         }
@@ -111,7 +115,8 @@ public class PatientSimMain {
 		System.out.println("Number of possible swaps : " + nbrSwaps);
 		double swapRatio = ((double) nbrSwaps / (double) ((app.getNbrqCases()*app.getNbrCases())/2)) * 100;
 		System.out.println("Rate of the possible swap : " + String.valueOf(swapRatio) + "%");
-
+		timeMeasurer.stopTimer();
+		timeMeasurer.displayTimes();
     }
 
 	

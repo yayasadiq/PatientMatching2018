@@ -44,4 +44,8 @@ public class TimeMeasurer {
 			System.out.println("Total time : " + totalTime + "s");
 		}
 	}
+	
+	public double getLastTime() {
+		return (double)this.timesMeasured.get(timesMeasured.size() - 1).getTime() / 1000;
+	}
 }

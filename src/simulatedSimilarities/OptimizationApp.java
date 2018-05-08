@@ -28,6 +28,7 @@ public class OptimizationApp{
 		this.trialPatientsId = optimizationConnector.getTrialPatientsId();
 		this.resultControlId = optimizationConnector.getResultControlId();
 		this.resultMatrix = optimizationConnector.getResultMatrix();
+		this.computeSimilaritiesSum();
 	}
 	
 	public void computeSimilaritiesSum() {

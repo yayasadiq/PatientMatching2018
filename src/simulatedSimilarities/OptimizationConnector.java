@@ -68,26 +68,47 @@ public class OptimizationConnector {
 		writeMatrix(outPath);
 	}
 
+	public List<List<Double>> makeMatrix(List<String> controlId) {
+		List<List<Double>> triangularMatrix = new ArrayList<>();
+		int counter = 1;
+		for (String trialId : trialPatientsId) {			
+			List<Double> sims = new ArrayList<>();
+			for(int i = 0; i < counter; i++) {
+				double sim = trialControlAssociation.get(trialId).get(resultControlId.get(i));
+				sims.add(sim);
+			}
+			triangularMatrix.add(sims);
+			counter ++;
+		}
+		return triangularMatrix;
+	}
+	
+	public List<List<Double>> makeMatrix(int[] indexControl) {
+		List<String> list = new ArrayList<>();
+		int lengthSolutions = indexControl.length;
+		for (int i = 0; i < lengthSolutions; i++) {
+			list.add(resultControlId.get(i));
+		}
+		return makeMatrix(list);
+	}
+	
 	public void writeMatrix(String filePath) {
 		CSVWriter csvWriter = new CSVWriter(filePath);
 		csvWriter.writeCell("Trial/Control");
 		for (String string : resultControlId) {
 			csvWriter.writeCell(string);
 		}
+		this.resultMatrix = makeMatrix(resultControlId);
 		NumberFormat nf = NumberFormat.getInstance( new java.util.Locale( "USA" ));
 		csvWriter.newLine();
-		int counter = 1;
-		for (String trialId : trialPatientsId) {			
-			csvWriter.writeCell(trialId);
-			List<Double> sims = new ArrayList<>();
-			for(int i = 0; i < counter; i++) {
-				double sim = trialControlAssociation.get(trialId).get(resultControlId.get(i));
-				sims.add(sim);
+		int nbrOfLine = resultMatrix.size();
+		for (int i =0; i < nbrOfLine; i++) {
+			List<Double> line = resultMatrix.get(i);
+			csvWriter.writeCell(controlPatientsId.get(i));
+			for(double sim : line) {
 				csvWriter.writeCell(nf.format(sim));
 			}
-			resultMatrix.add(sims);
 			csvWriter.newLine();
-			counter ++;
 		}
 		try {
 			csvWriter.createCSVWithContent();;
@@ -135,48 +156,22 @@ public class OptimizationConnector {
 		}
 	}
 
-	public CsvConnector getConnector() {
-		return connector;
-	}
-
-	public void setConnector(CsvConnector connector) {
-		this.connector = connector;
-	}
 
 	public List<String> getControlPatientsId() {
 		return controlPatientsId;
-	}
-
-	public void setControlPatientsId(List<String> controlPatientsId) {
-		this.controlPatientsId = controlPatientsId;
 	}
 
 	public List<String> getTrialPatientsId() {
 		return trialPatientsId;
 	}
 
-	public void setTrialPatientsId(List<String> trialPatientsId) {
-		this.trialPatientsId = trialPatientsId;
-	}
-
 	public List<String> getResultControlId() {
 		return resultControlId;
 	}
 
-	public void setResultControlId(List<String> resultControlId) {
-		this.resultControlId = resultControlId;
-	}
 
 	public Map<String, Map<String, Double>> getTrialControlAssociation() {
 		return trialControlAssociation;
-	}
-
-	public void setTrialControlAssociation(Map<String, Map<String, Double>> trialControlAssociation) {
-		this.trialControlAssociation = trialControlAssociation;
-	}
-
-	public void setResultMatrix(List<List<Double>> resultMatrix) {
-		this.resultMatrix = resultMatrix;
 	}
 
 	public void writeData(String fileName) {

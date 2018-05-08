@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import simulatedSimilarities.OptimizationApp;
 
-public class SimilaritiesManager implements Problem {
+public class SimilaritiesProblem implements Problem {
 	private OptimizationApp app;
 
-	public SimilaritiesManager(OptimizationApp app) {
+	public SimilaritiesProblem(OptimizationApp app) {
 		this.app = app;
 	}
 
@@ -18,6 +18,7 @@ public class SimilaritiesManager implements Problem {
 		for(double s:sims){
             val += s;
         }
-		return val/sims.length;
+		return val;
 	}
+	
 }

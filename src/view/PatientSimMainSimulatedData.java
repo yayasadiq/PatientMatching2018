@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.swing.text.MaskFormatter;
+
 import jcolibri.cbrcore.CBRCase;
 import jcolibri.cbrcore.CBRCaseBase;
 import jcolibri.exception.ExecutionException;
 import optimisation.fullSearch.FullSearch;
 import optimisation.localSearch.HillClimber;
-import optimisation.patientmatching.SimilaritiesManager;
+import optimisation.patientmatching.SimilaritiesProblem;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.patientmatching.Problem;
 import optimisation.utils.Utils;
@@ -37,7 +39,8 @@ public class PatientSimMainSimulatedData {
 		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 		String simulatedSim = parentRep + "SimulatedSim.csv";
 		String outSim = parentRep + "outSim.csv";
-
+		
+		System.out.println("Method | Max similarities sum | Similarities Sum | Number of swaps | Time");
 		
 		
 		OptimizationConnector optimizationConnector = new OptimizationConnector(outSim, simulatedSim);
@@ -57,17 +60,14 @@ public class PatientSimMainSimulatedData {
 		timeMeasurer.stopTimer();
 		
 		OptimizationApp app = new OptimizationApp(optimizationConnector);
-		Problem problem = new SimilaritiesManager(app);
+		Problem problem = new SimilaritiesProblem(app);
 		int[] startingSol = new int[optimizationConnector.getNumberSolutions()];
 		int solLength = startingSol.length;
 		for (int i = 0; i < solLength; i++) {
 			//put in the solution the position of the controlPatientsId in app
 			startingSol[i] = i;
 		}
-		System.out.println("Initial Solution: "+Utils.tableToString(startingSol,","));
-		double evaluateSolution = problem.evaluate(startingSol);
-		System.out.println("Initial Solution Fitness: "+ evaluateSolution);
-				
+		displayResult("Initial method", timeMeasurer, app);
 //		timeMeasurer.startTimer("IncreaseDiff");
 		app.increaseDiffAuto(1000);
 //		timeMeasurer.stopTimer();
@@ -78,9 +78,10 @@ public class PatientSimMainSimulatedData {
 		HillClimber localsearch = new HillClimber(startingSol , nFes , problem);
 		localsearch.evolve();
 		
-		System.out.println("\nBest Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
-		double localSearchSolution = localsearch.getBestFitness();
-		System.out.println("Best Fitness: "+ localSearchSolution);
+		List<List<Double>> resultMatrix = optimizationConnector.makeMatrix(localsearch.getBestSolution());
+		app.setResultMatrix(resultMatrix);
+		app.computeSimilaritiesSum();
+		displayResult("Local Search",timeMeasurer, app);
 		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Full Search");
@@ -90,9 +91,12 @@ public class PatientSimMainSimulatedData {
 		timeMeasurer.stopTimer();
 		app.setResultMatrix(optimizationConnector.getResultMatrix());
 		app.computeSimilaritiesSum();
-		app.displaySimilaritiesStat();
-		System.out.println("\nBest Fitness after Full Search : " + String.valueOf(app.getSimSum() /optimizationConnector.getNumberSolutions()));
+		displayResult("Full Search", timeMeasurer, app);		
 		timeMeasurer.displayTimes();
+	}
+
+	private static void displayResult(String methodName, TimeMeasurer timeMeasurer, OptimizationApp app) {
+		System.out.println(methodName + " | " + app.getMaxSimSum() + " | " + app.getSimSum() + " | " + app.getNbrOfSwaps() + " | " + timeMeasurer.getLastTime());
 	}
 	
 	

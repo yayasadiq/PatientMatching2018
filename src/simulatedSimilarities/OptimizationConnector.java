@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,21 +19,16 @@ public class OptimizationConnector {
 	
 	private List<String> controlPatientsId;
 	private List<String> trialPatientsId;
-	private List<String> resultControlId;
 	
 	private Map<String, Map<String, Double>> trialControlAssociation;
 	
 	private String outPath;
-
-	private List<List<Double>> resultMatrix;
 	
 	public OptimizationConnector(String inPath,String outPath) {
 		this.connector = new CsvConnector(inPath);
 		
 		this.controlPatientsId = new ArrayList<>();
 		this.trialPatientsId = new ArrayList<>();
-		this.resultControlId = new ArrayList<>();
-		this.resultMatrix = new ArrayList<>();
 		
 		this.trialControlAssociation = new HashMap<>();
 		this.outPath = outPath;
@@ -59,53 +55,20 @@ public class OptimizationConnector {
 			trialPatientsId.add(patientId);
 			trialControlAssociation.put(patientId, sims);
 		}
-	}
-
-	public void cycle() {
-		for (String trialId : trialPatientsId) {
-			this.resultControlId.add(findIndexOfMax(trialControlAssociation.get(trialId)));
-		}
-		writeMatrix(outPath);
-	}
-
-	public List<List<Double>> makeMatrix(List<String> controlId) {
-		List<List<Double>> triangularMatrix = new ArrayList<>();
-		int counter = 1;
-		for (String trialId : trialPatientsId) {			
-			List<Double> sims = new ArrayList<>();
-			for(int i = 0; i < counter; i++) {
-				double sim = trialControlAssociation.get(trialId).get(resultControlId.get(i));
-				sims.add(sim);
-			}
-			triangularMatrix.add(sims);
-			counter ++;
-		}
-		return triangularMatrix;
-	}
+	}	
 	
-	public List<List<Double>> makeMatrix(int[] indexControl) {
-		List<String> list = new ArrayList<>();
-		int lengthSolutions = indexControl.length;
-		for (int i = 0; i < lengthSolutions; i++) {
-			list.add(resultControlId.get(i));
-		}
-		return makeMatrix(list);
-	}
-	
-	public void writeMatrix(String filePath) {
+	public void writeMatrix(String filePath, List<String> resultControlId) {
 		CSVWriter csvWriter = new CSVWriter(filePath);
 		csvWriter.writeCell("Trial/Control");
 		for (String string : resultControlId) {
 			csvWriter.writeCell(string);
 		}
-		this.resultMatrix = makeMatrix(resultControlId);
-		NumberFormat nf = NumberFormat.getInstance( new java.util.Locale( "USA" ));
+		NumberFormat nf = NumberFormat.getInstance(new java.util.Locale( "USA" ));
 		csvWriter.newLine();
-		int nbrOfLine = resultMatrix.size();
-		for (int i =0; i < nbrOfLine; i++) {
-			List<Double> line = resultMatrix.get(i);
-			csvWriter.writeCell(controlPatientsId.get(i));
-			for(double sim : line) {
+		for (String trialId : trialPatientsId) {
+			csvWriter.writeCell(trialId);
+			for(String controlId : resultControlId) {
+				double sim = trialControlAssociation.get(trialId).get(controlId);
 				csvWriter.writeCell(nf.format(sim));
 			}
 			csvWriter.newLine();
@@ -116,21 +79,8 @@ public class OptimizationConnector {
 			e.printStackTrace();
 		}
 	}
-
-	private String findIndexOfMax(Map<String, Double> controlMap) {
-		double max = Integer.MIN_VALUE;
-		String maxPos = "";
-		for (Map.Entry<String, Double> control_sim : controlMap.entrySet()) {
-			double sim = control_sim.getValue();
-			if (sim > max && !resultControlId.contains(control_sim.getKey())) {
-				max = sim;
-				maxPos = control_sim.getKey();
-			}
-		}
-		return maxPos;
-	}
 	
-	public void mergeMatrixAndData() {
+	public void mergeMatrixAndData(List<List<Double>> resultMatrix, List<String> resultControlId) {
 		for (int i = 0; i < resultMatrix.size(); i++) {
 			List<Double> line = resultMatrix.get(i);
 			String trialId = trialPatientsId.get(i);
@@ -142,21 +92,6 @@ public class OptimizationConnector {
 		}
 	}
 	
-	public int getNumberSolutions() {
-		return resultControlId.size();
-	}
-
-	public List<List<Double>> getResultMatrix() {
-		return this.resultMatrix;
-	}
-	
-	public void displayMatrix() {
-		for (List<Double> sims : resultMatrix) {
-			System.out.println(sims);
-		}
-	}
-
-
 	public List<String> getControlPatientsId() {
 		return controlPatientsId;
 	}
@@ -165,54 +100,10 @@ public class OptimizationConnector {
 		return trialPatientsId;
 	}
 
-	public List<String> getResultControlId() {
-		return resultControlId;
-	}
-
 
 	public Map<String, Map<String, Double>> getTrialControlAssociation() {
 		return trialControlAssociation;
 	}
 
-	public void writeData(String fileName) {
-		CSVWriter csvWriter = new CSVWriter(fileName);
-        for (String controlId: resultControlId) {	
-			csvWriter.writeCell(controlId);;
-		}
-        csvWriter.newLine();
-        System.out.println("Header created");		
-	}
 
-	public double evaluate(int i, int j, double val, Double chosenSim) {
-		Double newVal = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId.get(i));
-		Double otherCurDiagSim = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId.get(j));
-		double newSims = val + newVal;
-		double oldSims = chosenSim + otherCurDiagSim;
-		if( newSims > oldSims) {
-			return newSims;
-		} else {
-			return -1;
-		}
-	}
-
-	public void makeChanges(Integer x, Integer y) {
-		String tempId;
-		
-		tempId = resultControlId.get(x);
-		resultControlId.set(x, resultControlId.get(y));
-		resultControlId.set(y, tempId);
-		int nbrOfTrial = trialPatientsId.size();
-		for (int i = x; i < nbrOfTrial; i++) {
-			List<Double> line = resultMatrix.get(i);
-			Double newSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(x));
-			line.set(x, newSim);
-			resultMatrix.set(i, line);
-		}
-		for (int i = y; i < nbrOfTrial; i++) {
-			List<Double> line = resultMatrix.get(i);
-			Double newSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(y));
-			line.set(y, newSim);
-			resultMatrix.set(i, line);
-		}
-	}
 }

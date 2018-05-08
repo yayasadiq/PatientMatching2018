@@ -1,28 +1,26 @@
 package optimisation.fullSearch;
 
 import java.util.List;
-import java.util.Set;
-
+import simulatedSimilarities.OptimizationApp;
 import simulatedSimilarities.OptimizationConnector;
-import utils.generator.Tuple;
 
 public class FullSearch {
 	
-	private OptimizationConnector optimizationConnector;
-	public FullSearch(OptimizationConnector optimizationConnector) {
-		this.optimizationConnector = optimizationConnector;
+	private OptimizationApp optimizationApp;
+	public FullSearch(OptimizationApp optimizationApp) {
+		this.optimizationApp = optimizationApp;
 	}
 	
 	public void optimize() {
 
-		List<List<Double>> resultMatrix = optimizationConnector.getResultMatrix();
+		List<List<Double>> resultMatrix = optimizationApp.getResultMatrix();
 		int listSize = resultMatrix.size();
 		int i = 1;
 		while ( i < listSize) {
 			List<Double> line = resultMatrix.get(i);
 			int numberColumn = isThereABetterSolution( i, line);
 			if(numberColumn != -1) {
-				resultMatrix = optimizationConnector.getResultMatrix();
+				resultMatrix = optimizationApp.getResultMatrix();
 				i = numberColumn;
 				continue;
 			}
@@ -38,7 +36,7 @@ public class FullSearch {
 		for (int j = 0; j < lineLength; j++) {
 			double val = line.get(j);
 			if (val > chosenSim) {
-				double evaluateValue = optimizationConnector.evaluate(i,j, val, chosenSim);
+				double evaluateValue = optimizationApp.evaluate(i,j, val, chosenSim);
 				if(evaluateValue > maxValue) {
 					bestTuple = j;
 					maxValue = evaluateValue;
@@ -46,7 +44,7 @@ public class FullSearch {
 			}				
 		}
 		if (bestTuple != -1) { 
-			optimizationConnector.makeChanges(i, bestTuple);
+			optimizationApp.makeChanges(i, bestTuple);
 			return bestTuple;
 		}
 		return -1;

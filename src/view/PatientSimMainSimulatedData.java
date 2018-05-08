@@ -23,6 +23,7 @@ import patientMatching.CsvConnector;
 import patientMatching.PatientSim;
 import simulatedSimilarities.OptimizationApp;
 import simulatedSimilarities.OptimizationConnector;
+import simulatedSimilarities.SimilarityManager;
 import utils.IOhelpers.InputManager;
 import utils.generator.Generator;
 import utils.generator.PatientGenerator;
@@ -30,7 +31,6 @@ import utils.timer.TimeMeasurer;
 
 public class PatientSimMainSimulatedData {
 	
-	private static final int NBR_TRIAL_PATIENT = 1000;
 	private static final int NUMBER_CONTROL_PATIENT = 1500;
 	private static final int NUMBER_TRIAL_PATIENT = 70;
 
@@ -54,50 +54,49 @@ public class PatientSimMainSimulatedData {
 			e.printStackTrace();
 		}
 		timeMeasurer.stopTimer();
+		OptimizationApp app = new OptimizationApp(optimizationConnector);
 		
 		timeMeasurer.startTimer("Cycle");
-		optimizationConnector.cycle();
+		app.cycle();
 		timeMeasurer.stopTimer();
 		
-		OptimizationApp app = new OptimizationApp(optimizationConnector);
+		SimilarityManager similarityManager = new SimilarityManager(app);
 		Problem problem = new SimilaritiesProblem(app);
-		int[] startingSol = new int[optimizationConnector.getNumberSolutions()];
+		int[] startingSol = new int[app.getNumberSolutions()];
 		int solLength = startingSol.length;
 		for (int i = 0; i < solLength; i++) {
-			//put in the solution the position of the controlPatientsId in app
 			startingSol[i] = i;
 		}
-		displayResult("Initial method", timeMeasurer, app);
+		displayResult("Initial method", timeMeasurer, similarityManager);
 		timeMeasurer.startTimer("IncreaseDiff");
-		app.increaseDiffAuto(1000);
+		similarityManager.increaseDiffAuto(1000);
 		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Local Search");
-		int nFes = 1500;
+		int nFes = 100000;
 		
 		HillClimber localsearch = new HillClimber(startingSol , nFes , problem);
 		localsearch.evolve();
 		
-		List<List<Double>> resultMatrix = optimizationConnector.makeMatrix(localsearch.getBestSolution());
-		app.setResultMatrix(resultMatrix);
-		app.computeSimilaritiesSum();
+		List<List<Double>> resultMatrix = app.makeMatrix(localsearch.getBestSolution());
+		similarityManager.setResultMatrix(resultMatrix);
+		similarityManager.computeSimilaritiesSum();
 		timeMeasurer.stopTimer();
-		displayResult("Local Search",timeMeasurer, app);
+		displayResult("Local Search",timeMeasurer, similarityManager);
 		
 		timeMeasurer.startTimer("Full Search");
-		FullSearch fullSearch = new FullSearch(optimizationConnector);
+		FullSearch fullSearch = new FullSearch(app);
 		fullSearch.optimize();
+		similarityManager.computeSimilaritiesSum();
 		timeMeasurer.stopTimer();
-		displayResult("Full Search", timeMeasurer, app);		
+		displayResult("Full Search", timeMeasurer, similarityManager);		
 
 		timeMeasurer.stopTimer();
-		app.setResultMatrix(optimizationConnector.getResultMatrix());
-		app.computeSimilaritiesSum();
 		timeMeasurer.displayTimes();
 	}
 
-	private static void displayResult(String methodName, TimeMeasurer timeMeasurer, OptimizationApp app) {
-		System.out.println(methodName + " | " + app.getMaxSimSum() + " | " + app.getSimSum() + " | " + app.getNbrOfSwaps() + " | " + timeMeasurer.getLastTime());
+	private static void displayResult(String methodName, TimeMeasurer timeMeasurer, SimilarityManager simManager) {
+		System.out.println(methodName + " | " + simManager.getMaxSimSum() + " | " + simManager.getSimSum() + " | " + simManager.getNbrOfSwaps() + " | " + timeMeasurer.getLastTime());
 	}
 	
 	

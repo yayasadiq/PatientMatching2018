@@ -1,7 +1,5 @@
 package optimisation.patientmatching;
 
-import java.util.Arrays;
-
 import simulatedSimilarities.OptimizationApp;
 
 public class SimilaritiesProblem implements Problem {

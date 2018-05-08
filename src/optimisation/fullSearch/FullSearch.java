@@ -1,26 +1,27 @@
 package optimisation.fullSearch;
 
+import java.util.ArrayList;
 import java.util.List;
 import simulatedSimilarities.OptimizationApp;
-import simulatedSimilarities.OptimizationConnector;
 
 public class FullSearch {
 	
 	private OptimizationApp optimizationApp;
+	List<List<Double>> resultMatrix;
+	
 	public FullSearch(OptimizationApp optimizationApp) {
 		this.optimizationApp = optimizationApp;
+		this.resultMatrix = optimizationApp.getResultMatrix();
 	}
 	
 	public void optimize() {
 
-		List<List<Double>> resultMatrix = optimizationApp.getResultMatrix();
 		int listSize = resultMatrix.size();
 		int i = 1;
 		while ( i < listSize) {
 			List<Double> line = resultMatrix.get(i);
 			int numberColumn = isThereABetterSolution( i, line);
 			if(numberColumn != -1) {
-				resultMatrix = optimizationApp.getResultMatrix();
 				i = numberColumn;
 				continue;
 			}
@@ -29,6 +30,7 @@ public class FullSearch {
 	}
 
 	private int isThereABetterSolution( int i, List<Double> line) {
+		
 		int lineLength = line.size() - 1;
 		Double chosenSim = line.get(lineLength);
 		double maxValue = chosenSim;

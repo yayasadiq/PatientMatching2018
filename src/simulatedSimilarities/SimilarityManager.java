@@ -20,12 +20,11 @@ public class SimilarityManager {
 		this.trialPatientsId = app.getTrialPatientIds();
 		
 		this.app = app;
-		
+		this.resultMatrix = app.getResultMatrix();
 		this.computeSimilaritiesSum();
 	}
 
 	public void computeSimilaritiesSum() {
-		this.resultMatrix = app.getResultMatrix();		
 		this.simSum = 0;
 		this.maxSimSum = 0;
 		this.nbrOfSwaps = 0;

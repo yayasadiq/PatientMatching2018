@@ -61,12 +61,12 @@ public class OptimizationApp{
 	}
 	
 	public List<List<Double>> makeMatrix(int[] indexControl) {
-		List<String> list = new ArrayList<>();
+		List<String> controlIds = new ArrayList<>();
 		int lengthSolutions = indexControl.length;
 		for (int i = 0; i < lengthSolutions; i++) {
-			list.add(resultControlId.get(i));
+			controlIds.add(resultControlId.get(indexControl[i]));
 		}
-		return makeMatrix(list);
+		return makeMatrix(controlIds);
 	}
 	
 	public double evaluate(int i, int j, double val, Double chosenSim) {
@@ -100,13 +100,14 @@ public class OptimizationApp{
 			line.set(y, newSim);
 			resultMatrix.set(i, line);
 		}
+		
 	}
 	
 	public double[] getSimilarities(int[] solutions) {
-		int solLength = solutions.length;
-		double[] similarities = new double[solLength];
-		for (int i = 0; i < solLength; i++) {
-			similarities[i] = resultMatrix.get(i).get(i);
+		double[] similarities = new double[solutions.length];
+		int nbrOfTrialPatients = trialPatientsId.size();
+		for (int i = 0; i < nbrOfTrialPatients; i++) {
+			similarities[i] = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(solutions[i]));
 		}
 		return similarities;
 	}

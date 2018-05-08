@@ -27,6 +27,7 @@ import simulatedSimilarities.SimilarityManager;
 import utils.IOhelpers.InputManager;
 import utils.generator.Generator;
 import utils.generator.PatientGenerator;
+import utils.generator.SimilarityGenerator;
 import utils.timer.TimeMeasurer;
 
 public class PatientSimMainSimulatedData {
@@ -37,13 +38,16 @@ public class PatientSimMainSimulatedData {
 	public static void main(String[] args) {
 
 		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
-		String simulatedSim = parentRep + "SimulatedSim.csv";
-		String outSim = parentRep + "outSim.csv";
+		String pathResultMatrix = parentRep + "SimulatedSim.csv";
+		String outSimOrignial = parentRep + "outSim.csv";
+//		String outSimGenerated = parentRep + "outSimGenerated.csv";
+//		generateFile(outSimGenerated);
+		String inSim = outSimOrignial;
 		
 		System.out.println("Method | Max similarities sum | Similarities Sum | Number of swaps | Time");
 		
 		
-		OptimizationConnector optimizationConnector = new OptimizationConnector(outSim, simulatedSim);
+		OptimizationConnector optimizationConnector = new OptimizationConnector(inSim, pathResultMatrix);
 		TimeMeasurer timeMeasurer = new TimeMeasurer();
 		timeMeasurer.startTimer("Total time");
 		
@@ -87,12 +91,23 @@ public class PatientSimMainSimulatedData {
 		timeMeasurer.startTimer("Full Search");
 		FullSearch fullSearch = new FullSearch(app);
 		fullSearch.optimize();
+		resultMatrix = app.getResultMatrix();
+		similarityManager.setResultMatrix(resultMatrix);
 		similarityManager.computeSimilaritiesSum();
 		timeMeasurer.stopTimer();
 		displayResult("Full Search", timeMeasurer, similarityManager);		
 
 		timeMeasurer.stopTimer();
 		timeMeasurer.displayTimes();
+	}
+
+	private static void generateFile(String outSimGenerated) {
+		SimilarityGenerator similarityGenerator = new SimilarityGenerator(outSimGenerated);
+		try {
+			similarityGenerator.makeSquareMatrix(NUMBER_TRIAL_PATIENT, NUMBER_CONTROL_PATIENT);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	private static void displayResult(String methodName, TimeMeasurer timeMeasurer, SimilarityManager simManager) {

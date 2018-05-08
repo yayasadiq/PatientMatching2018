@@ -68,12 +68,12 @@ public class PatientSimMainSimulatedData {
 			startingSol[i] = i;
 		}
 		displayResult("Initial method", timeMeasurer, app);
-//		timeMeasurer.startTimer("IncreaseDiff");
+		timeMeasurer.startTimer("IncreaseDiff");
 		app.increaseDiffAuto(1000);
-//		timeMeasurer.stopTimer();
+		timeMeasurer.stopTimer();
 		
 		timeMeasurer.startTimer("Local Search");
-		int nFes = 100000;
+		int nFes = 1500;
 		
 		HillClimber localsearch = new HillClimber(startingSol , nFes , problem);
 		localsearch.evolve();
@@ -81,17 +81,18 @@ public class PatientSimMainSimulatedData {
 		List<List<Double>> resultMatrix = optimizationConnector.makeMatrix(localsearch.getBestSolution());
 		app.setResultMatrix(resultMatrix);
 		app.computeSimilaritiesSum();
-		displayResult("Local Search",timeMeasurer, app);
 		timeMeasurer.stopTimer();
+		displayResult("Local Search",timeMeasurer, app);
 		
 		timeMeasurer.startTimer("Full Search");
 		FullSearch fullSearch = new FullSearch(optimizationConnector);
 		fullSearch.optimize();
 		timeMeasurer.stopTimer();
+		displayResult("Full Search", timeMeasurer, app);		
+
 		timeMeasurer.stopTimer();
 		app.setResultMatrix(optimizationConnector.getResultMatrix());
 		app.computeSimilaritiesSum();
-		displayResult("Full Search", timeMeasurer, app);		
 		timeMeasurer.displayTimes();
 	}
 

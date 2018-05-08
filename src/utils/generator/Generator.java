@@ -13,7 +13,7 @@ public abstract class Generator {
 		this.csvWriter = new CSVWriter(filepath);
 	}
 	
-	public abstract void makeData(int nbrLignes) throws FileNotFoundException;
+	public abstract void makeData(int nbrLines) throws FileNotFoundException;
 	
 	public void setFilepath(String filepath) {
 		this.filepath = filepath;

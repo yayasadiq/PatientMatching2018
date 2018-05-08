@@ -10,11 +10,11 @@ public class PatientGenerator extends Generator {
 		super(filepath);
 	}
 	
-	public void makeData(int nbrLignes) throws FileNotFoundException {
+	public void makeData(int nbrLines) throws FileNotFoundException {
         Random rand = new Random();
         int cursor = 2;
         csvWriter.addLines(TITLES);
-        for (int i = 0; i < nbrLignes; i++) {
+        for (int i = 0; i < nbrLines; i++) {
 			csvWriter.writeCell(i);
 			csvWriter.writeCell(rand.nextInt(50));
 			while(cursor < 15) {

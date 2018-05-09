@@ -2,6 +2,7 @@ package simulatedSimilarities;
 
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -26,12 +27,41 @@ public class OptimizationApp{
 	}
 	
 	public void cycle() {
+		String controlID;
+		List<Double> sims = new ArrayList<>();
+		List<String> sortedControlId = new ArrayList<>();
+		List<String> sortedTrialId = new ArrayList<>();
 		for (String trialId : trialPatientsId) {
-			this.resultControlId.add(findIndexOfMax(trialControlAssociation.get(trialId)));
+			controlID = findIndexOfMax(trialControlAssociation.get(trialId));
+			int index = insertTrial(trialId, controlID, sims);
+			if (index == -1 ) {
+				sortedTrialId.add(trialId);
+				sortedControlId.add(controlID);
+			} else {
+				sortedTrialId.add(index, trialId);
+				sortedControlId.add(index, controlID);				
+			}
 		}
+		trialPatientsId = sortedTrialId;
+		resultControlId = sortedControlId;
 		this.resultMatrix = makeMatrix(resultControlId);
+		optimizationConnector.writeMatrix(null, resultControlId);
 	}
 	
+	private int insertTrial(String trialId, String controlID, List<Double> sims) {
+		double curSim = trialControlAssociation.get(trialId).get(controlID);
+		int counter = 0;
+		int nbrOfColumns = sims.size();
+		while (counter < nbrOfColumns && sims.get(counter) > curSim)
+			counter++;
+		
+		if (counter == nbrOfColumns) {
+			sims.add(curSim);
+			return -1;
+		}
+		return counter;
+	}
+
 	private String findIndexOfMax(Map<String, Double> controlMap) {
 		double max = 0;
 		String maxPos = "";
@@ -127,6 +157,7 @@ public class OptimizationApp{
 	public void setResultMatrix(List<List<Double>> resultMatrix) {
 		this.resultMatrix = resultMatrix;
 		optimizationConnector.mergeMatrixAndData(resultMatrix, resultControlId);
+		optimizationConnector.writeMatrix(null, resultControlId);
 	}
 	
 

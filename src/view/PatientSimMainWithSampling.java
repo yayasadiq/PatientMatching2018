@@ -98,11 +98,11 @@ public class PatientSimMainWithSampling {
 			System.out.println("Initial Solution Fitness: "+problem.evaluate(startingSolution));
 			
 			int numberOfFitnessEvaluations = 1000;
-			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
-			localsearch.evolve();
-			
-			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
-			System.out.println("Best Fitness: "+localsearch.getBestFitness());
+//			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
+//			localsearch.evolve();
+//			
+//			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
+//			System.out.println("Best Fitness: "+localsearch.getBestFitness());
 
         }catch(ExecutionException e){
             System.err.println(e.getMessage());

@@ -58,6 +58,9 @@ public class OptimizationConnector {
 	}	
 	
 	public void writeMatrix(String filePath, List<String> resultControlId) {
+		if (filePath == null) {
+			filePath = this.outPath;
+		}
 		CSVWriter csvWriter = new CSVWriter(filePath);
 		csvWriter.writeCell("Trial/Control");
 		for (String string : resultControlId) {

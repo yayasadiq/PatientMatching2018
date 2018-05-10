@@ -20,7 +20,7 @@ public class FullSearch {
 		int i = 1;
 		while ( i < listSize) {
 			List<Double> line = resultMatrix.get(i);
-			int numberColumn = isThereABetterSolution( i, line);
+			int numberColumn = isThereABetterSolution(i, line);
 			if(numberColumn != -1) {
 				i = numberColumn;
 				continue;

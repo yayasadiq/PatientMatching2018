@@ -93,12 +93,12 @@ public class PatientSimMain {
 			timeMeasurer.stopTimer();
 			timeMeasurer.startTimer("Local Search");
             int numberOfFitnessEvaluations = 1000;
-			HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
-			localsearch.evolve();
-			
-			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
-			double localSearchSolution = localsearch.getBestFitness();
-			System.out.println("Best Fitness: "+localSearchSolution);
+//          HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
+//			localsearch.evolve();
+//			
+//			System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
+//			double localSearchSolution = localsearch.getBestFitness();
+//			System.out.println("Best Fitness: "+localSearchSolution);
 			
 			timeMeasurer.stopTimer();
         }catch(ExecutionException e){

@@ -32,18 +32,9 @@ public class OptimizationApp{
 		List<String> sortedControlId = new ArrayList<>();
 		List<String> sortedTrialId = new ArrayList<>();
 		for (String trialId : trialPatientsId) {
-			controlID = findIndexOfMax(trialControlAssociation.get(trialId));
-			int index = insertTrial(trialId, controlID, sims);
-			if (index == -1 ) {
-				sortedTrialId.add(trialId);
-				sortedControlId.add(controlID);
-			} else {
-				sortedTrialId.add(index, trialId);
-				sortedControlId.add(index, controlID);				
-			}
+			resultControlId.add(findIndexOfMax(trialControlAssociation.get(trialId)));
+
 		}
-		trialPatientsId = sortedTrialId;
-		resultControlId = sortedControlId;
 		this.resultMatrix = makeMatrix(resultControlId);
 		optimizationConnector.writeMatrix(null, resultControlId);
 	}
@@ -90,11 +81,11 @@ public class OptimizationApp{
 		return triangularMatrix;
 	}
 	
-	public List<List<Double>> makeMatrix(int[] indexControl) {
+	public List<List<Double>> makeMatrixWithIndex(List<Integer> indexControl) {
 		List<String> controlIds = new ArrayList<>();
-		int lengthSolutions = indexControl.length;
+		int lengthSolutions = indexControl.size();
 		for (int i = 0; i < lengthSolutions; i++) {
-			controlIds.add(resultControlId.get(indexControl[i]));
+			controlIds.add(resultControlId.get(indexControl.get(i)));
 		}
 		return makeMatrix(controlIds);
 	}
@@ -110,6 +101,7 @@ public class OptimizationApp{
 			return -1;
 		}
 	}
+	
 	
 	public void makeChanges(Integer x, Integer y) {
 		String tempId;
@@ -158,6 +150,16 @@ public class OptimizationApp{
 		this.resultMatrix = resultMatrix;
 		optimizationConnector.mergeMatrixAndData(resultMatrix, resultControlId);
 		optimizationConnector.writeMatrix(null, resultControlId);
+	}
+
+	public double evaluate(int i, int j, int firstControlPatientId, int secondControlPatientId) {
+		Double newVal = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId.get(firstControlPatientId));
+		Double val = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(secondControlPatientId));
+		Double otherCurDiagSim = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId.get(secondControlPatientId));
+		Double chosenSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(firstControlPatientId));
+		double newSims = val + newVal;
+		double oldSims = chosenSim + otherCurDiagSim;
+		return newSims - oldSims;
 	}
 	
 

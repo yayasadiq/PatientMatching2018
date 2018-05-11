@@ -112,42 +112,6 @@ public class SimilarityManager {
 		this.resultMatrix = resultMatrix;
 	}
 
-	private void changeNextAmeliorableSim(int indiceLine, int indiceColumn, Random rand) {
-		int nbrOfLines = resultMatrix.size();
-		int i = indiceLine;
-		int j = 0;
-		double chosenSim = 0;
-		int lineSize = 0;
-		List<Double> line = null;
-		int currentColumn = 0;
-		boolean hasFound = false;
-		int initialPointPlusSize = indiceLine + nbrOfLines;
-		int currentLine = (i % (nbrOfLines - 1))+ 1;
-		while (i < initialPointPlusSize && !hasFound) {
-			currentLine = (i % (nbrOfLines - 1))+ 1;
-			line = resultMatrix.get(currentLine);
-			lineSize = line.size() - 1;
-			chosenSim = line.get(lineSize);
-			if (chosenSim < 1) {
-				j = indiceColumn;
-				int initialColumnPointPlusSize = lineSize + indiceColumn;
-				while (j < initialColumnPointPlusSize && !hasFound) {
-					currentColumn = j % lineSize;
-					if (line.get(currentColumn) < chosenSim) {
-						hasFound = true;
-					} 
-					j++;															
-				}
-			}
-			i++;
-		}
-		if (hasFound) {
-			ameliorateSim(rand, currentLine , line, currentColumn, chosenSim);
-		} else {
-			throw new NullPointerException("There is no more similities available");
-		}
-	}	
-
 	public double getSimSum() {
 		return simSum;
 	}

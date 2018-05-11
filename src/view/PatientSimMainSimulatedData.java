@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import optimisation.fullSearch.FullSearch;
 import optimisation.localSearch.HillClimber;
-import optimisation.patientmatching.Problem;
 import simulatedSimilarities.OptimizationApp;
 import simulatedSimilarities.OptimizationConnector;
 import simulatedSimilarities.SimilarityManager;
@@ -16,20 +15,19 @@ import utils.timer.TimeMeasurer;
 public class PatientSimMainSimulatedData {
 	
 	
-	private static int NUMBER_CONTROL_PATIENT =3000;
+	private static int NUMBER_CONTROL_PATIENT =30000;
 	static int NUMBER_TRIAL_PATIENT = 70;
 
 	public static void main(String[] args) {
-		int NBR_SWAP_REQUIRED = 50;
+		int NBR_SWAP_REQUIRED = 1500;
 		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 		String pathResultMatrix = parentRep + "SimulatedSim.csv";
-		String outSimOrignial = parentRep + "outSim.csv";
 		String outSimGenerated = parentRep + "outSimGenerated.csv";
-
-		generateFile(outSimGenerated);
-		String inSim = outSimGenerated;
-
-		System.out.println("Method | Max similarities sum | Similarities Sum | Number of swaps | Time");
+		String inPathOriginal = parentRep + "outSim.csv";
+		//generateFile(outSimGenerated);
+		String inSim = inPathOriginal;
+		
+		System.out.println("\nMethod | Max similarities sum | Similarities Sum | Number of swaps | Time");
 		
 		
 		OptimizationConnector optimizationConnector = new OptimizationConnector(inSim, pathResultMatrix);
@@ -51,11 +49,12 @@ public class PatientSimMainSimulatedData {
 		
 		SimilarityManager similarityManager = new SimilarityManager(app);
 		displayAndWriteResult("Initial method", timeMeasurer, similarityManager);
-		double simSum = similarityManager.getSimSum();
+		System.out.println("\nInitial max similarities sum : " + similarityManager.getSimSum());
 		timeMeasurer.startTimer("IncreaseDiff");
 		similarityManager.increaseDiffAuto(NBR_SWAP_REQUIRED);
+		app.writeMatrix();
 		timeMeasurer.stopTimer();
-		
+		System.out.println("Current max similarities sum : " + similarityManager.getMaxSimSum() + "\n");
 		timeMeasurer.startTimer("Local Search");
 		int nFes = 100000;
 		
@@ -78,6 +77,7 @@ public class PatientSimMainSimulatedData {
 
 		timeMeasurer.stopTimer();
 		timeMeasurer.displayTimes();
+
 		
 	}
 

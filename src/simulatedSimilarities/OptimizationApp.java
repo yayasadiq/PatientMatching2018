@@ -162,5 +162,7 @@ public class OptimizationApp{
 		return newSims - oldSims;
 	}
 	
-
+	public void writeMatrix() {
+		optimizationConnector.writeMatrix(null, resultControlId);
+	}
 }

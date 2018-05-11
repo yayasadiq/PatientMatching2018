@@ -76,15 +76,13 @@ public class SimilarityManager {
 				int indiceLine = rand.nextInt(trialSize) + 1;
 				List<Double> line = resultMatrix.get(indiceLine);
 				int lineSize = line.size() - 1;
-				int indiceColumn = rand.nextInt(lineSize);
 				double chosenSim = line.get(lineSize);
 				if (chosenSim < 1) {
-					if (chosenSim < line.get(indiceColumn)) {
-						changeNextAmeliorableSim( indiceLine,  indiceColumn,  rand);
-					} else {
+					int indiceColumn = rand.nextInt(lineSize);
+					if (chosenSim > line.get(indiceColumn)) {
 						ameliorateSim(rand, indiceLine, line, indiceColumn, chosenSim);
+						nbrOfSwaps ++;
 					}
-					nbrOfSwaps++;
 				}
 			}
 		} else {

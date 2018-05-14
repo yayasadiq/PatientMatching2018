@@ -15,25 +15,45 @@ import utils.timer.TimeMeasurer;
 public class PatientSimMainSimulatedData {
 	
 	
-	private static int NUMBER_CONTROL_PATIENT =30000;
-	static int NUMBER_TRIAL_PATIENT = 70;
+	private static int NUMBER_CONTROL_PATIENT =3000;
+	static int NUMBER_TRIAL_PATIENT = 500;
 
 	public static void main(String[] args) {
-		int NBR_SWAP_REQUIRED = 1500;
+		int NBR_SWAP_REQUIRED = 50;
 		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 		String pathResultMatrix = parentRep + "SimulatedSim.csv";
 		String outSimGenerated = parentRep + "outSimGenerated.csv";
 		String inPathOriginal = parentRep + "outSim.csv";
-		//generateFile(outSimGenerated);
-		String inSim = inPathOriginal;
 		
+		SimilarityManager similarityManager;
+		generateFile(outSimGenerated);
+		String inSim = outSimGenerated;
 		System.out.println("\nMethod | Max similarities sum | Similarities Sum | Number of swaps | Time");
-		
 		
 		OptimizationConnector optimizationConnector = new OptimizationConnector(inSim, pathResultMatrix);
 		TimeMeasurer timeMeasurer = new TimeMeasurer();
 		timeMeasurer.startTimer("Total time");
 		
+		runConfigure(optimizationConnector, timeMeasurer);
+
+		OptimizationApp app = new OptimizationApp(optimizationConnector);
+		
+		similarityManager = runCycle(timeMeasurer, app);
+		displayAndWriteResult("Initial method", timeMeasurer, similarityManager);
+		
+		runIncreaseDif(NBR_SWAP_REQUIRED, similarityManager, timeMeasurer, app);
+		
+		runLocalSearch(similarityManager, timeMeasurer, app);
+		displayAndWriteResult("Local Search",timeMeasurer, similarityManager);
+		runFullSearch(timeMeasurer, app, similarityManager);
+		displayAndWriteResult("Full Search", timeMeasurer, similarityManager);		
+
+		timeMeasurer.stopTimer();
+		timeMeasurer.displayTimes();	
+		
+	}
+
+	private static void runConfigure(OptimizationConnector optimizationConnector, TimeMeasurer timeMeasurer) {
 		timeMeasurer.startTimer("Configure");
 		try {
 			optimizationConnector.configure();
@@ -41,31 +61,42 @@ public class PatientSimMainSimulatedData {
 			e.printStackTrace();
 		}
 		timeMeasurer.stopTimer();
-		OptimizationApp app = new OptimizationApp(optimizationConnector);
-		
+	}
+
+	private static SimilarityManager runCycle(TimeMeasurer timeMeasurer, OptimizationApp app) {
+		SimilarityManager similarityManager;
 		timeMeasurer.startTimer("Cycle");
 		app.cycle();
 		timeMeasurer.stopTimer();
-		
-		SimilarityManager similarityManager = new SimilarityManager(app);
-		displayAndWriteResult("Initial method", timeMeasurer, similarityManager);
-		System.out.println("\nInitial max similarities sum : " + similarityManager.getSimSum());
+		similarityManager = new SimilarityManager(app);
+		return similarityManager;
+	}
+
+	private static void runIncreaseDif(int NBR_SWAP_REQUIRED, SimilarityManager similarityManager,
+			TimeMeasurer timeMeasurer, OptimizationApp app) {
 		timeMeasurer.startTimer("IncreaseDiff");
 		similarityManager.increaseDiffAuto(NBR_SWAP_REQUIRED);
 		app.writeMatrix();
 		timeMeasurer.stopTimer();
-		System.out.println("Current max similarities sum : " + similarityManager.getMaxSimSum() + "\n");
+	}
+
+	private static void runLocalSearch(SimilarityManager similarityManager, TimeMeasurer timeMeasurer,
+			OptimizationApp app) {
+		List<List<Double>> resultMatrix;
 		timeMeasurer.startTimer("Local Search");
 		int nFes = 100000;
 		
 		HillClimber localsearch = new HillClimber(nFes , app);
 		localsearch.evolve();
-		
-		List<List<Double>> resultMatrix = app.makeMatrixWithIndex(localsearch.getBestSolution());
+		resultMatrix = app.makeMatrixWithIndex(localsearch.getBestSolution());
 		similarityManager.setResultMatrix(resultMatrix);
 		similarityManager.computeSimilaritiesSum();
 		timeMeasurer.stopTimer();
-		displayAndWriteResult("Local Search",timeMeasurer, similarityManager);
+	}
+
+	private static void runFullSearch(TimeMeasurer timeMeasurer, OptimizationApp app,
+			SimilarityManager similarityManager) {
+		List<List<Double>> resultMatrix;
 		timeMeasurer.startTimer("Full Search");
 		FullSearch fullSearch = new FullSearch(app);
 		fullSearch.optimize();
@@ -73,12 +104,6 @@ public class PatientSimMainSimulatedData {
 		similarityManager.setResultMatrix(resultMatrix);
 		similarityManager.computeSimilaritiesSum();
 		timeMeasurer.stopTimer();
-		displayAndWriteResult("Full Search", timeMeasurer, similarityManager);		
-
-		timeMeasurer.stopTimer();
-		timeMeasurer.displayTimes();
-
-		
 	}
 
 	private static void generateFile(String outSimGenerated) {

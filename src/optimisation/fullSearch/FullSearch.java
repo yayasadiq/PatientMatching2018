@@ -1,6 +1,5 @@
 package optimisation.fullSearch;
 
-import java.util.ArrayList;
 import java.util.List;
 import simulatedSimilarities.OptimizationApp;
 

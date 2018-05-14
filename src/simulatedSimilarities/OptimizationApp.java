@@ -102,7 +102,6 @@ public class OptimizationApp{
 		}
 	}
 	
-	
 	public void makeChanges(Integer x, Integer y) {
 		String tempId;
 		
@@ -124,15 +123,6 @@ public class OptimizationApp{
 		}
 		
 	}
-	
-	public double[] getSimilarities(int[] solutions) {
-		double[] similarities = new double[solutions.length];
-		int nbrOfTrialPatients = trialPatientsId.size();
-		for (int i = 0; i < nbrOfTrialPatients; i++) {
-			similarities[i] = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(solutions[i]));
-		}
-		return similarities;
-	}
 
 	public List<List<Double>> getResultMatrix() {
 		return resultMatrix;
@@ -149,7 +139,7 @@ public class OptimizationApp{
 	public void setResultMatrix(List<List<Double>> resultMatrix) {
 		this.resultMatrix = resultMatrix;
 		optimizationConnector.mergeMatrixAndData(resultMatrix, resultControlId);
-		optimizationConnector.writeMatrix(null, resultControlId);
+		this.writeMatrix();
 	}
 
 	public double evaluate(int i, int j, int firstControlPatientId, int secondControlPatientId) {

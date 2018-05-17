@@ -78,7 +78,7 @@ public class CsvConnector implements Connector{
     @Override
     public Collection<CBRCase> retrieveAllCases() {
         Collection<CBRCase> cases = new ArrayList();        
-        try{            
+        try{         
             List<String[]> data = this.parse();
             for(int i=1; i<data.size();i++){
 //                System.out.println("i: "+i);

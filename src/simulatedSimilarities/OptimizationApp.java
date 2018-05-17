@@ -33,7 +33,6 @@ public class OptimizationApp{
 		List<String> sortedTrialId = new ArrayList<>();
 		for (String trialId : trialPatientsId) {
 			resultControlId.add(findIndexOfMax(trialControlAssociation.get(trialId)));
-
 		}
 		this.resultMatrix = makeMatrix(resultControlId);
 		optimizationConnector.writeMatrix(null, resultControlId);

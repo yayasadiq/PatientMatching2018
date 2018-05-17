@@ -1,60 +1,80 @@
 package utils.generator;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
-public class SimilarityGenerator extends Generator{
+import utils.IOhelpers.CSVWriter;
+import utils.timer.TimeMeasurer;
 
-	private static final double MAX_VALUE = 0.5;
+public class SimilarityGenerator extends Generator{
+	private static final int NBR_OF_GENERATED_COLUMNS = 100;
 	private static final String TITLES = "Trial / Control";
-	private static final int[] COEFFICIENT = {1,10,20, 20, 30, 30, 20, 20, 10, 1};
-	private static final double[] MIN_BOUND = {0, 0.1, 0.2, 0.3, 0.4, 0.5,0.6,0.7,0.8 ,0.9};
 
 	public SimilarityGenerator(String filepath) {
 		super(filepath);
 	}
 
 	@Override
-	public void makeData(int nbrLines) throws FileNotFoundException {
-		makeSquareMatrix(nbrLines, nbrLines);
+	public void makeData(int nbrLines) throws IOException {
+		makeRectangularMatrix(nbrLines, nbrLines);
 		
 	}
 
-	public void makeSquareMatrix(int nbrLines, int nbrColumns) throws FileNotFoundException {
+	public void makeRectangularMatrix(int nbrLines, int nbrColumns) throws IOException{
+		int curNbrOfColumns = 100;
+		TimeMeasurer measurer = new TimeMeasurer();
+		List<Double> list = new LinkedList<>();
+		measurer.startTimer("Generating");
 		Random rand = new Random();
-        int cursor = 2;
-        csvWriter.writeCell(TITLES);
-        for (int i = 0; i < nbrColumns; i++) {
-			csvWriter.writeCell(i);
+		double functionResult = Math.exp(-1/Math.log(100));
+		List<StringBuilder> rows = new ArrayList<>();
+		List<List<Double>> base = new ArrayList<>();
+		
+		rows.add(new StringBuilder());
+		StringBuilder header = rows.get(0);
+		header.append(TITLES).append(',');
+		for (int i = 2; i <= nbrLines; i++) {
+			rows.add(new StringBuilder(String.valueOf(i) + ","));
 		}
-        csvWriter.newLine();
-        for (int i = 0; i < nbrLines ; i++) {
-        	csvWriter.writeCell(i);
-        	for (int j = 0; j < nbrColumns; j++) {
-    			csvWriter.writeCell(rand.nextDouble() * MAX_VALUE);
-    		}
-        	csvWriter.newLine();
+		
+		for (int j = 0; j < NBR_OF_GENERATED_COLUMNS ; j++) {
+			header.append(String.valueOf(j)).append(',');
+			base.add(new ArrayList<>());
+			for (int i = 1 ; i < nbrLines; i++) {
+				double generatedSim = generateSim(rand, functionResult);
+				rows.get(i).append(String.valueOf(generatedSim)).append(',');
+				base.get(j).add(generatedSim);
+			}
 		}
-
-        csvWriter.createCSVWithContent();
-        System.out.println("CVS generated");
+		while (curNbrOfColumns < nbrColumns) {
+			List<Double> column = base.get(rand.nextInt(NBR_OF_GENERATED_COLUMNS-1));		
+			for (int i = 1 ; i < nbrLines-1; i++) {
+				Double sim = column.get(i);
+				if (rand.nextBoolean()) {
+					rows.get(i).append(sim - (rand.nextDouble() * sim)/10).append(',');					
+				} else {
+					rows.get(i).append(sim + (rand.nextDouble() * (1-sim))/10).append(',');										
+				}
+			}
+			curNbrOfColumns++;
+		}
+		
+		for (StringBuilder sb : rows) {
+			sb.append('\n');
+			csvWriter.addLines(sb.toString());
+		}
+		csvWriter.createCSVWithContent();
+		csvWriter.saveData();
+		measurer.stopTimer();
+		System.out.println("Generating data duration : " + measurer.getLastTime() + "s");
 	}
-
-	private double chooseRandomWeightNumber(Random rand) {
-		int nbrOfCoefficient = COEFFICIENT.length;
-		int maxBound = 0;
-		for (int i = 0; i < nbrOfCoefficient; i++) {
-			maxBound += COEFFICIENT[i];
-		}
-		int choosenNumber = rand.nextInt(maxBound);
-		int counter = 0;
-		while(choosenNumber >= 0) {
-			choosenNumber -= COEFFICIENT[counter];
-			counter++;
-		}
-		double rangeMin = MIN_BOUND[counter - 1];
-		double rangeMax = rangeMin + 0.1;
-		return rangeMin + (rangeMax - rangeMin) * rand.nextDouble();
+	
+	private double generateSim(Random rand, double functionResult) {
+		double minBound = Math.pow(functionResult, rand.nextInt(100) + 1);
+		return minBound + ((1-minBound)/ 5) * rand.nextDouble();
 	}
 
 }

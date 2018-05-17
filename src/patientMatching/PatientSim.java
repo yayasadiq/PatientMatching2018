@@ -109,7 +109,9 @@ public class PatientSim  implements StandardCBRApplication {
         casebase.init(connector); 
         Collection<CBRCase> cases = casebase.getCases();  
         for(CBRCase c: cases){
-            casesMap.put(Integer.parseInt((String)c.getID()), c);
+            String controlId = (String)c.getID();
+			casesMap.put(Integer.parseInt(controlId), c);
+            controls.add(controlId);
         }
         return casebase;
     }
@@ -222,24 +224,25 @@ public class PatientSim  implements StandardCBRApplication {
 		return best_total_sim;
 	}
 
-	public void writeSimilarities(CBRCase c, CSVWriter csvWriter) throws IOException {
+	public void writeSimilarities(CBRCase c, CSVWriter csvWriter) {
 		Collection<RetrievalResult> result = NNScoringMethod.evaluateSimilarity(casebase.getCases(), c, nnConfig);
         Collection<RetrievalResult> retievedCases = SelectCases.selectAllRR(result);
         for (RetrievalResult retrievalResult : retievedCases) {
 			controlsSim.put((String)retrievalResult.get_case().getID(), retrievalResult.getEval());
 		}
+        csvWriter.writeCell(c.getID());
         for (String string : controls) {
-			csvWriter.writeCell(String.valueOf(controlsSim.get(string)));			
+			csvWriter.writeCell(controlsSim.get(string));	
 		}
         csvWriter.newLine();
 	}
 
-	public void writeControls(CSVWriter csvWriter) {
+	public void writeControls(CSVWriter csvWriter) throws IOException {
+		csvWriter.writeCell("Trial/Control");
         for (Map.Entry entry: casesMap.entrySet()) {	
-			csvWriter.writeCell(String.valueOf(entry.getKey()));;
+			csvWriter.writeCell(entry.getKey());
 		}
         csvWriter.newLine();
-        System.out.println("Header created");
 	}
     
 }

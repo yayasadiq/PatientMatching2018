@@ -15,39 +15,40 @@ import utils.timer.TimeMeasurer;
 public class PatientSimMainSimulatedData {
 	
 	
-	private static int NUMBER_CONTROL_PATIENT =3000;
-	static int NUMBER_TRIAL_PATIENT = 500;
+	private final static int NUMBER_CONTROL_PATIENT = 10000;
+	private static int NUMBER_TRIAL_PATIENT = 70;
+	private final static int NBR_SWAP_REQUIRED = 50;
 
 	public static void main(String[] args) {
-		int NBR_SWAP_REQUIRED = 50;
 		String parentRep = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 		String pathResultMatrix = parentRep + "SimulatedSim.csv";
 		String outSimGenerated = parentRep + "outSimGenerated.csv";
 		String inPathOriginal = parentRep + "outSim.csv";
-		
+					
 		SimilarityManager similarityManager;
-		generateFile(outSimGenerated);
-		String inSim = outSimGenerated;
-		System.out.println("\nMethod | Max similarities sum | Similarities Sum | Number of swaps | Time");
+		//generateFile(outSimGenerated);
+		String inSim = inPathOriginal;
 		
+		System.out.println("\nMethod | Max similarities sum | Similarities Sum | Number of swaps | Time");
+
 		OptimizationConnector optimizationConnector = new OptimizationConnector(inSim, pathResultMatrix);
 		TimeMeasurer timeMeasurer = new TimeMeasurer();
 		timeMeasurer.startTimer("Total time");
 		
 		runConfigure(optimizationConnector, timeMeasurer);
-
+		
 		OptimizationApp app = new OptimizationApp(optimizationConnector);
 		
 		similarityManager = runCycle(timeMeasurer, app);
 		displayAndWriteResult("Initial method", timeMeasurer, similarityManager);
 		
-		runIncreaseDif(NBR_SWAP_REQUIRED, similarityManager, timeMeasurer, app);
-		
 		runLocalSearch(similarityManager, timeMeasurer, app);
 		displayAndWriteResult("Local Search",timeMeasurer, similarityManager);
+		
 		runFullSearch(timeMeasurer, app, similarityManager);
-		displayAndWriteResult("Full Search", timeMeasurer, similarityManager);		
-
+		displayAndWriteResult("Full Search", timeMeasurer, similarityManager);
+		
+		
 		timeMeasurer.stopTimer();
 		timeMeasurer.displayTimes();	
 		
@@ -109,8 +110,8 @@ public class PatientSimMainSimulatedData {
 	private static void generateFile(String outSimGenerated) {
 		SimilarityGenerator similarityGenerator = new SimilarityGenerator(outSimGenerated);
 		try {
-			similarityGenerator.makeSquareMatrix(NUMBER_TRIAL_PATIENT, NUMBER_CONTROL_PATIENT);
-		} catch (FileNotFoundException e1) {
+			similarityGenerator.makeRectangularMatrix(NUMBER_TRIAL_PATIENT, NUMBER_CONTROL_PATIENT);
+		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 	}

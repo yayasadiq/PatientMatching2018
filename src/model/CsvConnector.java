@@ -134,7 +134,7 @@ public class CsvConnector implements Connector{
     
    
     public Collection<CBRQuery> retrieveAllQueries() {
-        Collection<CBRQuery> queries = new ArrayList();        
+        Collection<CBRQuery> queries = new ArrayList();       
         try{            
             List<String[]> data = this.parse();
             for(int i=1; i<data.size();i++){

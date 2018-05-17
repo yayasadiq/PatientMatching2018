@@ -44,6 +44,7 @@ public class FullSearch {
 				}
 			}				
 		}
+		
 		if (bestTuple != -1) { 
 			optimizationApp.makeChanges(i, bestTuple);
 			return bestTuple;

@@ -34,7 +34,7 @@ import optimisation.utils.Utils;
  */
 public class PatientSimMain {
     
-    private static final int NUMBER_TRIAL_PATIENT = 70;
+    private static final int NUMBER_TRIAL_PATIENT = 450;
 	private static final int NUMBER_CONTROL_PATIENT = 3000;
 	private static final String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 	private static final String cbPath = dirPath + "ControlsModified.csv"; 
@@ -44,7 +44,7 @@ public class PatientSimMain {
 	private static CSVWriter csvWriter = new CSVWriter(outSim);
 
 	public static void main(String[] args) {
-		generatePatients();
+		//generatePatients();
         PatientSim app = new PatientSim(cbPath, outPath);
         List<String> controls = new ArrayList<>();
         
@@ -76,7 +76,7 @@ public class PatientSimMain {
 				e.printStackTrace();
 			}
             app.postCycle();
-            PatientSimMainSimulatedData.main(args);
+            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT);
 			
 
 			

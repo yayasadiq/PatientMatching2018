@@ -28,12 +28,22 @@ public class Euclidean implements LocalSimilarityFunction{
         double[] vals2 = (double[])o1;
         
         double dist=0;
-        for(int i=0; i<vals1.length; i++){
-            dist += Math.pow(vals1[i]-vals2[i], 2);
+        double sumV2 = 0;
+        int tabLength = vals1.length;
+		for(int i=0; i < tabLength; i++){
+			double val2 = vals2[i];
+			double val1 = vals1[i];
+			if (val1 > val2) {
+				dist += val1 - val2;
+				sumV2 += val1;
+			} else {
+				dist += val2 - val1;
+				sumV2 += val2;
+			}
+			dist +=val1-val2;
         }
-        dist = Math.sqrt(dist);
-        double score = 1/(1 + dist);
-        return score;
+       
+        return dist/sumV2;
     }
 
     @Override

@@ -33,7 +33,6 @@ import jcolibri.cbrcore.Connector;
 import jcolibri.exception.ExecutionException;
 import jcolibri.method.retrieve.FilterBasedRetrieval.FilterBasedRetrievalMethod;
 import jcolibri.method.retrieve.FilterBasedRetrieval.FilterConfig;
-import jcolibri.method.retrieve.FilterBasedRetrieval.predicates.Equal;
 import jcolibri.method.retrieve.NNretrieval.NNConfig;
 import jcolibri.method.retrieve.NNretrieval.NNScoringMethod;
 import jcolibri.method.retrieve.NNretrieval.similarity.global.Average;
@@ -41,8 +40,10 @@ import jcolibri.method.retrieve.NNretrieval.similarity.local.Interval;
 //import jcolibri.method.retrieve.NNretrieval.similarity.local.Equal;
 import jcolibri.method.retrieve.RetrievalResult;
 import jcolibri.method.retrieve.selection.SelectCases;
-import patientMatching.CsvConnector;
-import patientMatching.PatientDescription;
+import model.CsvConnector;
+import model.MockPatient;
+import model.MockPatientConnector;
+import model.PatientDescription;
 import utils.IOhelpers.CSVWriter;
 
 /**
@@ -78,19 +79,16 @@ public class PatientSim  implements StandardCBRApplication {
 	@Override
     public void configure() throws ExecutionException{
         casesMap = new HashMap();
-        connector  = new CsvConnector(cbPath);
+        connector  = new MockPatientConnector(cbPath);
         casebase = new MyLinealCaseBase();
         controls = new ArrayList<>();
         controlsSim = new HashMap<>();
-        fConfig = new FilterConfig();
-        fConfig.addPredicate(new Attribute("age", PatientDescription.class), new ApproxEqual());
+
         
         nnConfig = new NNConfig();
         nnConfig.setDescriptionSimFunction(new Average());
-        nnConfig.addMapping(new Attribute("age", PatientDescription.class), new Interval(23));
-        nnConfig.addMapping(new Attribute("bts", PatientDescription.class), new DTW());
-        nnConfig.addMapping(new Attribute("control", PatientDescription.class), new DTW());
-        nnConfig.addMapping(new Attribute("drugVec", PatientDescription.class), new Jaccard());
+        nnConfig.addMapping(new Attribute("attributs", MockPatient.class), new Euclidean());
+
         
         similarities = new ArrayList();
         

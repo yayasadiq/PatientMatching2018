@@ -16,11 +16,14 @@ import java.util.List;
 import java.util.Map;
 import jcolibri.cbrcore.CBRCase;
 import jcolibri.cbrcore.CBRCaseBase;
+import jcolibri.cbrcore.Connector;
 import jcolibri.exception.ExecutionException;   
-import patientMatching.CsvConnector;
+import model.CsvConnector;
+import model.MockPatientConnector;
 import patientMatching.PatientSim;
 import utils.IOhelpers.CSVWriter;
 import utils.generator.Generator;
+import utils.generator.MockPatientGenerator;
 import utils.generator.PatientGenerator;
 import utils.timer.TimeMeasurer;
 import optimisation.localSearch.HillClimber;
@@ -34,21 +37,24 @@ import optimisation.utils.Utils;
  */
 public class PatientSimMain {
     
-    private static final int NUMBER_TRIAL_PATIENT = 450;
-	private static final int NUMBER_CONTROL_PATIENT = 3000;
+    private static final int NUMBER_TRIAL_PATIENT = 70;
+	private static final int NUMBER_CONTROL_PATIENT = 20000;
 	private static final String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 	private static final String cbPath = dirPath + "ControlsModified.csv"; 
 	private static final String qPath = dirPath + "CasesModified.csv";
 	private static final String outPath = dirPath + "Output.csv";
 	private static final String outSim = dirPath + "outSim.csv";
 	private static CSVWriter csvWriter = new CSVWriter(outSim);
+	private static TimeMeasurer timeMeasurer = new TimeMeasurer();
 
 	public static void main(String[] args) {
-		//generatePatients();
+		timeMeasurer.startTimer("Total :");
+		generatePatients();
         PatientSim app = new PatientSim(cbPath, outPath);
         List<String> controls = new ArrayList<>();
         
 		try{
+			timeMeasurer.startTimer("Generate Data");
             app.configure();
             CBRCaseBase caseBase = app.preCycle();
             Collection<CBRCase> cases = caseBase.getCases();
@@ -56,7 +62,7 @@ public class PatientSimMain {
             for(CBRCase c:cases){
                 casesMap.put((String)c.getID(), c);
             }
-            CsvConnector conn = new CsvConnector(qPath);
+            Connector conn = new MockPatientConnector(qPath);
             List<CBRCase> qCases = (List)conn.retrieveAllCases();
             Map<String, CBRCase> queriesMap = new HashMap();
             for(CBRCase c:qCases){
@@ -76,10 +82,10 @@ public class PatientSimMain {
 				e.printStackTrace();
 			}
             app.postCycle();
+            timeMeasurer.stopTimer();
             Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT);
-			
-
-			
+			timeMeasurer.stopTimer();
+			timeMeasurer.displayTimes();
         }catch(ExecutionException e){
             System.err.println(e.getMessage());
         }
@@ -91,7 +97,7 @@ public class PatientSimMain {
 
 	private static void generatePatients() {
 		try {
-        	Generator generator = new PatientGenerator(cbPath);
+        	Generator generator = new MockPatientGenerator(cbPath);
         	generator.makeData(NUMBER_CONTROL_PATIENT);
         	generator.setFilepath(qPath);
         	generator.makeData(NUMBER_TRIAL_PATIENT);        	

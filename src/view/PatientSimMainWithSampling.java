@@ -5,18 +5,15 @@
 package view;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import jcolibri.casebase.MyLinealCaseBase;
 import jcolibri.cbrcore.CBRCase;
-import jcolibri.cbrcore.CBRCaseBase;
 import jcolibri.exception.ExecutionException;   
-import patientMatching.CsvConnector;
+import model.CsvConnector;
 import patientMatching.PatientSim;
-import optimisation.localSearch.HillClimber;
 import optimisation.patientmatching.PatientMatchingProblem;
 import optimisation.utils.Utils;
 

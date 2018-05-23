@@ -40,7 +40,6 @@ public class Euclidean implements LocalSimilarityFunction{
 				dist += val2 - val1;
 				sumV2 += val2;
 			}
-			dist +=val1-val2;
         }
        
         return dist/sumV2;

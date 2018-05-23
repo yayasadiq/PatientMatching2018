@@ -37,59 +37,69 @@ import optimisation.utils.Utils;
  */
 public class PatientSimMain {
     
-    private static final int NUMBER_TRIAL_PATIENT = 70;
-	private static final int NUMBER_CONTROL_PATIENT = 20000;
+    private static final int NUMBER_TRIAL_PATIENT = 500;
+	private static int NUMBER_CONTROL_PATIENT = 1000;
 	private static final String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 	private static final String cbPath = dirPath + "ControlsModified.csv"; 
 	private static final String qPath = dirPath + "CasesModified.csv";
 	private static final String outPath = dirPath + "Output.csv";
 	private static final String outSim = dirPath + "outSim.csv";
-	private static CSVWriter csvWriter = new CSVWriter(outSim);
+	private static final String statPath = dirPath + "statistics/GeneratedDataStatistics.csv";
 	private static TimeMeasurer timeMeasurer = new TimeMeasurer();
 
 	public static void main(String[] args) {
-		timeMeasurer.startTimer("Total :");
-		generatePatients();
-        PatientSim app = new PatientSim(cbPath, outPath);
-        List<String> controls = new ArrayList<>();
-        
-		try{
-			timeMeasurer.startTimer("Generate Data");
-            app.configure();
-            CBRCaseBase caseBase = app.preCycle();
-            Collection<CBRCase> cases = caseBase.getCases();
-            Map<String, CBRCase> casesMap = new HashMap();
-            for(CBRCase c:cases){
-                casesMap.put((String)c.getID(), c);
-            }
-            Connector conn = new MockPatientConnector(qPath);
-            List<CBRCase> qCases = (List)conn.retrieveAllCases();
-            Map<String, CBRCase> queriesMap = new HashMap();
-            for(CBRCase c:qCases){
-                queriesMap.put((String)c.getID(), c);
-            }
-           
-            try {
-            	app.writeControls(csvWriter);
-            	csvWriter.createCSVWithContent();
-            	app.setqCases(qCases);
-                for(CBRCase c:qCases){
-                    app.writeSimilarities(c, csvWriter);
-                    System.out.println("Done !");
-                }
-            	csvWriter.saveData();
-            } catch (IOException e) {
-				e.printStackTrace();
-			}
-            app.postCycle();
-            timeMeasurer.stopTimer();
-            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT);
-			timeMeasurer.stopTimer();
-			timeMeasurer.displayTimes();
-        }catch(ExecutionException e){
-            System.err.println(e.getMessage());
-        }
-
+		
+		while (NUMBER_CONTROL_PATIENT < 12000) {
+			CSVWriter csvWriter = new CSVWriter(outSim);
+			timeMeasurer.startTimer("Total :");
+			generatePatients();
+	        PatientSim app = new PatientSim(cbPath, outPath);
+	        List<String> controls = new ArrayList<>();
+	        
+			try{
+	            app.configure();
+	            CBRCaseBase caseBase = app.preCycle();
+	            Collection<CBRCase> cases = caseBase.getCases();
+	            Map<String, CBRCase> casesMap = new HashMap();
+	            for(CBRCase c:cases){
+	                casesMap.put((String)c.getID(), c);
+	            }
+	            Connector conn = new MockPatientConnector(qPath);
+	            List<CBRCase> qCases = (List)conn.retrieveAllCases();
+	            Map<String, CBRCase> queriesMap = new HashMap();
+	            for(CBRCase c:qCases){
+	                queriesMap.put((String)c.getID(), c);
+	            }
+	           
+	            try {
+	            	app.writeControls(csvWriter);
+	            	csvWriter.createCSVWithContent();
+	            	app.setqCases(qCases);
+	                for(CBRCase c:qCases){
+	                    app.writeSimilarities(c, csvWriter);
+	                    System.out.println("Done !");
+	                }
+	            	csvWriter.saveData();
+	            } catch (IOException e) {
+					e.printStackTrace();
+				}
+	            app.postCycle();
+	            csvWriter = new CSVWriter(statPath);
+	            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT, csvWriter);
+				timeMeasurer.stopTimer();
+				csvWriter.writeCell(timeMeasurer.getLastTime());
+				csvWriter.newLine();
+				timeMeasurer.displayTimes();
+				try {
+					csvWriter.saveData();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+	        }catch(ExecutionException e){
+	            System.err.println(e.getMessage());
+	        }
+			NUMBER_CONTROL_PATIENT += 1000;
+		}
 
     }
 

@@ -36,11 +36,29 @@ public class CSVWriter {
 	}
 	
 	public <T> void writeCell(T cell) {
-		this.sb.append(String.valueOf(cell)).append(',');
+		if (sb.length() < 1000000) {
+			this.sb.append(String.valueOf(cell)).append(',');		
+		} else {
+			try {
+				this.saveData();
+			} catch (IOException e1) {
+				e1.getStackTrace();
+			}
+			this.sb = new StringBuilder();
+			this.sb.append(String.valueOf(cell)).append(',');
+		}
 	}
 	
 	public void newLine() {
-		this.sb.append('\n');
+		if (sb.length() < 1000000) {
+			sb.append('\n');			
+		} else {
+			try {
+				this.saveData();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void saveData() throws IOException {
@@ -55,7 +73,15 @@ public class CSVWriter {
 	}
 	
 	public void addLines(String string) {
-		sb.append(string);
+		if (sb.length() < 1000000) {
+			sb.append(string);			
+		} else {
+			try {
+				this.saveData();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	@Override

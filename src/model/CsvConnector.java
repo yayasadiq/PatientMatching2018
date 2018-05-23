@@ -30,7 +30,7 @@ public class CsvConnector implements Connector{
     
     private String filepath;
     private File file;
-
+    
     public CsvConnector(String filepath) {
         this.filepath = filepath;
         this.file = new File(filepath);

@@ -77,117 +77,71 @@ public class CsvConnector implements Connector{
     @Override
     public Collection<CBRCase> retrieveAllCases() {
         Collection<CBRCase> cases = new ArrayList();        
-        try{            
+        buildPatients(cases);
+        return cases;
+    }
+
+	private void buildPatients(Collection cases) {
+		try{            
             List<String[]> data = this.parse();
-            for(int i=1; i<data.size();i++){
-//                System.out.println("i: "+i);
-                String[] pRecord = data.get(i);
-                CBRCase _case = new CBRCase();                
-                PatientDescription patient =  new PatientDescription();
-                _case.setDescription(patient);
-                int j=0;
-                patient.setId(pRecord[j]);                
-                patient.setAge(Integer.parseInt(pRecord[++j]));
-                
-                //Get all BTS values
-                double[] bts = new double[12];                
-                for(int k=0; k<bts.length;k++){  
-                    String val =  pRecord[++j];
-                    if(val.isEmpty())
-                        val = "0";
-                    bts[k] = Integer.parseInt(val);
-                }
-                patient.setBts(bts);
-                
-                //Get all control values
-                double[] control = new double[12];                
-                for(int k=0; k<control.length;k++){   
-                    String val =  pRecord[++j];
-                    if(val.isEmpty())
-                        val = "0";
-                    control[k] = Integer.parseInt(val);
-                }
-                patient.setControl(control);
-                
-                //Get all Drug01 values
-                int[][] drugs = new int[11][12];                
-                for(int k=0; k<drugs.length;k++){
-//                    System.out.println("k: "+k);                    
-                    for(int l=0; l<drugs[0].length; l++){
-//                        System.out.println("l: "+l);
-                        String val =  pRecord[++j];
-                        if(val.isEmpty())
-                            val = "0";
-//                        System.out.println(j);
-                        drugs[k][l] = Integer.parseInt(val);
-                    }                    
-                }
-                patient.setDrugs(drugs);
-                
-                cases.add(_case);
+            for(int i=1; i<data.size();i++){               
+                cases.add(createCase(data, i));
             }
         }catch(IOException e){
             System.err.println(e.getMessage());
         }
-        return cases;
-    }
+	}
+
+	private CBRCase createCase(List<String[]> data, int i) {
+		String[] pRecord = data.get(i);
+		CBRCase _case = new CBRCase();                
+		PatientDescription patient =  new PatientDescription();
+		_case.setDescription(patient);
+		int j=0;
+		patient.setId(pRecord[j]);                
+		patient.setAge(Integer.parseInt(pRecord[++j]));
+		
+		//Get all BTS values
+		double[] bts = new double[12];                
+		for(int k=0; k<bts.length;k++){  
+		    String val =  pRecord[++j];
+		    if(val.isEmpty())
+		        val = "0";
+		    bts[k] = Integer.parseInt(val);
+		}
+		patient.setBts(bts);
+		
+		//Get all control values
+		double[] control = new double[12];                
+		for(int k=0; k<control.length;k++){   
+		    String val =  pRecord[++j];
+		    if(val.isEmpty())
+		        val = "0";
+		    control[k] = Integer.parseInt(val);
+		}
+		patient.setControl(control);
+		
+		//Get all Drug01 values
+		int[][] drugs = new int[11][12];                
+		for(int k=0; k<drugs.length;k++){
+//                    System.out.println("k: "+k);                    
+		    for(int l=0; l<drugs[0].length; l++){
+//                        System.out.println("l: "+l);
+		        String val =  pRecord[++j];
+		        if(val.isEmpty())
+		            val = "0";
+//                        System.out.println(j);
+		        drugs[k][l] = Integer.parseInt(val);
+		    }                    
+		}
+		patient.setDrugs(drugs);
+		return _case;
+	}
     
    
     public Collection<CBRQuery> retrieveAllQueries() {
         Collection<CBRQuery> queries = new ArrayList();       
-        try{            
-            List<String[]> data = this.parse();
-            for(int i=1; i<data.size();i++){
-//                System.out.println("i: "+i);
-                String[] pRecord = data.get(i);
-                CBRCase _case = new CBRCase();                
-                PatientDescription patient =  new PatientDescription();
-                _case.setDescription(patient);
-                int j=0;
-                patient.setId(pRecord[j]);                
-                patient.setAge(Integer.parseInt(pRecord[++j]));
-                
-                //Get all BTS values
-                double[] bts = new double[12];                
-                for(int k=0; k<bts.length;k++){  
-                    String val =  pRecord[++j];
-                    if(val.isEmpty())
-                        val = "0";
-                    bts[k] = Integer.parseInt(val);
-                }
-                patient.setBts(bts);
-                
-                //Get all control values
-                double[] control = new double[12];                
-                for(int k=0; k<control.length;k++){   
-                    String val =  pRecord[++j];
-                    if(val.isEmpty())
-                        val = "0";
-                    control[k] = Integer.parseInt(val);
-                }
-                patient.setControl(control);
-                
-                //Get all Drug01 values
-                int[][] drugs = new int[11][12];                
-                for(int k=0; k<drugs.length;k++){
-//                    System.out.println("k: "+k);                    
-                    for(int l=0; l<drugs[0].length; l++){
-//                        System.out.println("l: "+l);
-                        String val =  pRecord[++j];
-                        if(val.isEmpty())
-                            val = "0";
-//                        System.out.println(j);
-                        drugs[k][l] = Integer.parseInt(val);
-                    }                    
-                }
-                patient.setDrugs(drugs);
-                
-                queries.add(_case);
-            }
-            System.out.println();
-        }catch(IOException e){
-            System.err.println(e.getMessage());
-        }
+        buildPatients(queries);
         return queries;
     }
 

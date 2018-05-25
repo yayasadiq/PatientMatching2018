@@ -31,8 +31,8 @@ public class FullSearch {
 	private int isThereABetterSolution( int i, List<Double> line) {
 		
 		int lineLength = line.size() - 1;
-		Double chosenSim = line.get(lineLength);
-		double maxValue = chosenSim;
+		double chosenSim = line.get(lineLength);
+		double maxValue = 0;
 		int bestTuple = -1;
 		for (int j = 0; j < lineLength; j++) {
 			double val = line.get(j);

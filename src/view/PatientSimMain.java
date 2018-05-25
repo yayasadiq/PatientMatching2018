@@ -37,7 +37,7 @@ import optimisation.utils.Utils;
  */
 public class PatientSimMain {
     
-    private static final int NUMBER_TRIAL_PATIENT = 500;
+    private static final int NUMBER_TRIAL_PATIENT = 100;
 	private static int NUMBER_CONTROL_PATIENT = 1000;
 	private static final String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 	private static final String cbPath = dirPath + "ControlsModified.csv"; 

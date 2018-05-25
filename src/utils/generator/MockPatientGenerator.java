@@ -52,7 +52,7 @@ public class MockPatientGenerator extends Generator {
     }
 
 	private double generateAttributs() {
-		return rand.nextDouble()*100;
+		return rand.nextDouble() * 100;
 	}
 
 

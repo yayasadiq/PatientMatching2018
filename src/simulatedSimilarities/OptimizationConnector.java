@@ -15,6 +15,8 @@ import utils.IOhelpers.CSVWriter;
 public class OptimizationConnector {
 
 	
+	private static final int FIRST_COLUMN_INDEX = 1;
+
 	private CsvConnector connector;
 	
 	private List<String> controlPatientsId;
@@ -34,19 +36,17 @@ public class OptimizationConnector {
 		this.outPath = outPath;
 	}
 
-	
-
 	public void configure() throws FileNotFoundException {
 		List<String[]> data = connector.parse();
 		String[] curLine = data.get(0);
 		int lineLength = curLine.length - 1;
-		for (int i = 1; i < lineLength; i++) {
+		for (int i = FIRST_COLUMN_INDEX; i < lineLength; i++) {
 			this.controlPatientsId.add(curLine[i]);
 		}
-		for (int i = 1; i < data.size(); i++) {
+		for (int i = FIRST_COLUMN_INDEX; i < data.size(); i++) {
 			curLine = data.get(i);
 			Map<String, Double> sims = new HashMap<>();
-			for (int j = 1; j < lineLength; j++) {
+			for (int j = FIRST_COLUMN_INDEX; j < lineLength; j++) {
 				sims.put(controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
 			}
 			

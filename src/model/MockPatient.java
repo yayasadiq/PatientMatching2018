@@ -6,7 +6,7 @@ import jcolibri.cbrcore.CaseComponent;
 public class MockPatient implements CaseComponent {
 	private String id;
 	private double[] attributs;
-	public static final int NUMBER_OF_ATTRIBUTS = 30;
+	public static final int NUMBER_OF_ATTRIBUTS = 100;
 	
 	@Override
     public Attribute getIdAttribute() {

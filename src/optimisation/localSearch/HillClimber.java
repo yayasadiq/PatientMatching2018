@@ -43,14 +43,18 @@ public class HillClimber {
 			
 			double sol = app.evaluate(i, j, currentSol.get(i), currentSol.get(j));
 			if (sol > 0) {
-				int temp = this.currentSol.get(i);
-				this.currentSol.set(i, this.currentSol.get(j));
-				this.currentSol.set(j, temp);
+				swapColumns(i, j);
 			}
 
 			fes ++;
 		}
 
+	}
+
+	private void swapColumns(int i, int j) {
+		int temp = this.currentSol.get(i);
+		this.currentSol.set(i, this.currentSol.get(j));
+		this.currentSol.set(j, temp);
 	}
 
 	public List<Integer> getBestSolution() {

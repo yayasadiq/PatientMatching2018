@@ -73,17 +73,7 @@ public class SimilarityManager {
 		if (totalMaxSwap >= nbrOfSwapsNeeded) {
 			Random rand = new Random();
 			while (nbrOfSwaps < nbrOfSwapsNeeded) {
-				int indiceLine = rand.nextInt(trialSize) + 1;
-				List<Double> line = resultMatrix.get(indiceLine);
-				int lineSize = line.size() - 1;
-				double chosenSim = line.get(lineSize);
-				if (chosenSim < 1) {
-					int indiceColumn = rand.nextInt(lineSize);
-					if (chosenSim > line.get(indiceColumn)) {
-						ameliorateSim(rand, indiceLine, line, indiceColumn, chosenSim);
-						nbrOfSwaps ++;
-					}
-				}
+				incrementSwapNumber(trialSize, rand);
 			}
 		} else {
 			throw new IllegalArgumentException("The number of swaps asked is more than the number of possible swaps (" + totalMaxSwap +")");
@@ -91,6 +81,20 @@ public class SimilarityManager {
 		app.setResultMatrix(resultMatrix);
 		computeSimilaritiesSum();
 		
+	}
+
+	private void incrementSwapNumber(int trialSize, Random rand) {
+		int indiceLine = rand.nextInt(trialSize) + 1;
+		List<Double> line = resultMatrix.get(indiceLine);
+		int lineSize = line.size() - 1;
+		double chosenSim = line.get(lineSize);
+		if (chosenSim < 1) {
+			int indiceColumn = rand.nextInt(lineSize);
+			if (chosenSim > line.get(indiceColumn)) {
+				ameliorateSim(rand, indiceLine, line, indiceColumn, chosenSim);
+				nbrOfSwaps ++;
+			}
+		}
 	}
 
 	private int reduceNumberOfSwaps(int totalMaxSwap) {

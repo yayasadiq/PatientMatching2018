@@ -120,9 +120,6 @@ public class PatientSim  implements StandardCBRApplication {
         if(!casesMap.containsKey(Integer.parseInt((String)cbrq.getID()))){
             casesMap.put(Integer.parseInt((String)cbrq.getID()), null);        
         }
-        //Collection<CBRCase> fCases = FilterBasedRetrievalMethod.filterCases(casebase.getCases(), cbrq, fConfig);
-        
-        //Collection<RetrievalResult> result = NNScoringMethod.evaluateSimilarity(fCases, cbrq, nnConfig);
         
         Collection<RetrievalResult> result = NNScoringMethod.evaluateSimilarity(casebase.getCases(), cbrq, nnConfig);
         Collection<RetrievalResult> retievedCases = SelectCases.selectTopKRR(result, 20);
@@ -134,7 +131,13 @@ public class PatientSim  implements StandardCBRApplication {
 			break;
 		}
                 
-        for(RetrievalResult rr:retievedCases){
+        getBestControlPatient(cbrq, retievedCases, df);
+        
+    }
+
+	private void getBestControlPatient(CBRQuery cbrq, Collection<RetrievalResult> retievedCases, DecimalFormat df)
+			throws ExecutionException {
+		for(RetrievalResult rr:retievedCases){
             if(!retrievedCases.contains((String)rr.get_case().getID())){
                 double sim = rr.getEval();
                 total_sim += sim;
@@ -153,8 +156,7 @@ public class PatientSim  implements StandardCBRApplication {
             }
             this.nbrOfPossibleSwaps ++;
         }
-        
-    }
+	}
     
     public int getNbrSwaps() {
     	return this.nbrOfPossibleSwaps;

@@ -27,10 +27,6 @@ public class OptimizationApp{
 	}
 	
 	public void cycle() {
-		String controlID;
-		List<Double> sims = new ArrayList<>();
-		List<String> sortedControlId = new ArrayList<>();
-		List<String> sortedTrialId = new ArrayList<>();
 		for (String trialId : trialPatientsId) {
 			resultControlId.add(findIndexOfMax(trialControlAssociation.get(trialId)));
 		}
@@ -94,11 +90,7 @@ public class OptimizationApp{
 		Double otherCurDiagSim = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId.get(j));
 		double newSims = val + newVal;
 		double oldSims = chosenSim + otherCurDiagSim;
-		if( newSims > oldSims) {
-			return newSims;
-		} else {
-			return -1;
-		}
+		return newSims - oldSims;
 	}
 	
 	public void makeChanges(Integer x, Integer y) {
@@ -108,19 +100,18 @@ public class OptimizationApp{
 		resultControlId.set(x, resultControlId.get(y));
 		resultControlId.set(y, tempId);
 		int nbrOfTrial = trialPatientsId.size();
+		changeColumn(x, nbrOfTrial);
+		changeColumn(y, nbrOfTrial);
+		
+	}
+
+	private void changeColumn(Integer x, int nbrOfTrial) {
 		for (int i = x; i < nbrOfTrial; i++) {
 			List<Double> line = resultMatrix.get(i);
 			Double newSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(x));
 			line.set(x, newSim);
 			resultMatrix.set(i, line);
 		}
-		for (int i = y; i < nbrOfTrial; i++) {
-			List<Double> line = resultMatrix.get(i);
-			Double newSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(y));
-			line.set(y, newSim);
-			resultMatrix.set(i, line);
-		}
-		
 	}
 
 	public List<List<Double>> getResultMatrix() {

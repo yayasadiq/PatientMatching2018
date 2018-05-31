@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
+
 import model.CsvConnector;
 import utils.IOhelpers.CSVWriter;
 
@@ -24,7 +28,7 @@ public class OptimizationConnector {
 	private List<String> controlPatientsId;
 	private List<String> trialPatientsId;
 	
-	private Map<String, Map<String, Double>> trialControlAssociation;
+	private	Table<String, String, Double> trialControlAssociation;
 	private String inPath;
 	private String outPath;
 	
@@ -34,7 +38,7 @@ public class OptimizationConnector {
 		this.controlPatientsId = new ArrayList<>();
 		this.trialPatientsId = new ArrayList<>();
 		
-		this.trialControlAssociation = new HashMap<>();
+		this.trialControlAssociation = HashBasedTable.create();
 		this.outPath = outPath;
 	}
 
@@ -51,19 +55,13 @@ public class OptimizationConnector {
 			}
 		    while (sc.hasNextLine()) {
 		        curLine = sc.nextLine().split(",");
-
-				Map<String, Double> sims = new HashMap<>();
+		        String patientId = curLine[0];
 				for (int j = FIRST_COLUMN_INDEX; j < lineLength; j++) {
-					sims.put(controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
+					trialControlAssociation.put(patientId, controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
 				}
-				
-				String patientId = curLine[0];
-				
-				trialPatientsId.add(patientId);
-				trialControlAssociation.put(patientId, sims);
-				
+				trialPatientsId.add(patientId);				
 		    }
-		    // note that Scanner suppresses exceptions
+		    System.out.println(trialControlAssociation.row("0").size() + " " + trialControlAssociation.column("0").size());
 		    if (sc.ioException() != null) {
 		        throw sc.ioException();
 		    }
@@ -91,7 +89,7 @@ public class OptimizationConnector {
 		for (String trialId : trialPatientsId) {
 			csvWriter.writeCell(trialId);
 			for(String controlId : resultControlId) {
-				double sim = trialControlAssociation.get(trialId).get(controlId);
+				double sim = trialControlAssociation.get(trialId, controlId);
 				csvWriter.writeCell(nf.format(sim));
 			}
 			csvWriter.newLine();
@@ -107,11 +105,9 @@ public class OptimizationConnector {
 		for (int i = 0; i < resultMatrix.size(); i++) {
 			List<Double> line = resultMatrix.get(i);
 			String trialId = trialPatientsId.get(i);
-			Map<String, Double> control_sim = trialControlAssociation.get(trialId);
 			for (int j = 0; j < line.size(); j++) {
-				control_sim.put(resultControlId.get(j), line.get(j));
+				trialControlAssociation.put(trialId, resultControlId.get(j), line.get(j));
 			}
-			trialControlAssociation.put(trialId, control_sim);
 		}
 	}
 	
@@ -124,7 +120,7 @@ public class OptimizationConnector {
 	}
 
 
-	public Map<String, Map<String, Double>> getTrialControlAssociation() {
+	public Table<String, String, Double> getTrialControlAssociation() {
 		return trialControlAssociation;
 	}
 

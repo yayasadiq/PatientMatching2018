@@ -1,5 +1,6 @@
 package simulatedSimilarities;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -8,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import model.CsvConnector;
 import utils.IOhelpers.CSVWriter;
@@ -23,12 +25,12 @@ public class OptimizationConnector {
 	private List<String> trialPatientsId;
 	
 	private Map<String, Map<String, Double>> trialControlAssociation;
-	
+	private String inPath;
 	private String outPath;
 	
 	public OptimizationConnector(String inPath,String outPath) {
-		this.connector = new CsvConnector(inPath);
-		
+		//this.connector = new CsvConnector(inPath);
+		this.inPath = inPath;
 		this.controlPatientsId = new ArrayList<>();
 		this.trialPatientsId = new ArrayList<>();
 		
@@ -36,24 +38,42 @@ public class OptimizationConnector {
 		this.outPath = outPath;
 	}
 
-	public void configure() throws FileNotFoundException {
-		List<String[]> data = connector.parse();
-		String[] curLine = data.get(0);
-		int lineLength = curLine.length - 1;
-		for (int i = FIRST_COLUMN_INDEX; i < lineLength; i++) {
-			this.controlPatientsId.add(curLine[i]);
-		}
-		for (int i = FIRST_COLUMN_INDEX; i < data.size(); i++) {
-			curLine = data.get(i);
-			Map<String, Double> sims = new HashMap<>();
-			for (int j = FIRST_COLUMN_INDEX; j < lineLength; j++) {
-				sims.put(controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
+	public void configure() throws IOException {
+		FileInputStream inputStream = null;
+		Scanner sc = null;
+		try {
+		    inputStream = new FileInputStream(inPath);
+		    sc = new Scanner(inputStream, "UTF-8");
+		    String[] curLine = sc.nextLine().split(",");
+		    int lineLength = curLine.length - 1;
+			for (int i = FIRST_COLUMN_INDEX; i < lineLength; i++) {
+				this.controlPatientsId.add(curLine[i]);
 			}
-			
-			String patientId = curLine[0];
-			
-			trialPatientsId.add(patientId);
-			trialControlAssociation.put(patientId, sims);
+		    while (sc.hasNextLine()) {
+		        curLine = sc.nextLine().split(",");
+
+				Map<String, Double> sims = new HashMap<>();
+				for (int j = FIRST_COLUMN_INDEX; j < lineLength; j++) {
+					sims.put(controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
+				}
+				
+				String patientId = curLine[0];
+				
+				trialPatientsId.add(patientId);
+				trialControlAssociation.put(patientId, sims);
+				
+		    }
+		    // note that Scanner suppresses exceptions
+		    if (sc.ioException() != null) {
+		        throw sc.ioException();
+		    }
+		} finally {
+		    if (inputStream != null) {
+		        inputStream.close();
+		    }
+		    if (sc != null) {
+		        sc.close();
+		    }
 		}
 	}	
 	

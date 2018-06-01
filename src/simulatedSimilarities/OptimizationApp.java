@@ -80,7 +80,7 @@ public class OptimizationApp{
 		for (int i = 0; i < nbrOfTrials; i++) {			
 			List<Double> sims = new ArrayList<>();
 			for(int j = 0; j < counter; j++) {
-				double sim = trialControlAssociation.get(trialPatientsId.get(j)).get(resultControlId2.get(j));
+				double sim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId2.get(j));
 				sims.add(sim);
 			}
 			triangularMatrix.add(sims);

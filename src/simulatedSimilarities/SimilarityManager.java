@@ -3,6 +3,8 @@ package simulatedSimilarities;
 import java.util.List;
 import java.util.Random;
 
+import gnu.trove.list.array.TIntArrayList;
+
 public class SimilarityManager {	
 	
 	private double simSum;
@@ -10,7 +12,7 @@ public class SimilarityManager {
 	private int nbrOfSwaps;
 	
 	private List<List<Double>> resultMatrix;
-	private List<String> trialPatientsId;
+	private TIntArrayList trialPatientsId;
 	
 	private OptimizationApp app;
 	

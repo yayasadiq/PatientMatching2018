@@ -85,7 +85,7 @@ public class PatientSimMain {
 				}
 	            app.postCycle();
 	            csvWriter = new CSVWriter(statPath);
-	            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT, csvWriter);
+//	            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT, csvWriter);
 				timeMeasurer.stopTimer();
 				csvWriter.writeCell(timeMeasurer.getLastTime());
 				csvWriter.newLine();

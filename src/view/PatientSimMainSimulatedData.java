@@ -58,7 +58,7 @@ public class PatientSimMainSimulatedData {
 		timeMeasurer.startTimer("Configure");
 		try {
 			optimizationConnector.configure();
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		timeMeasurer.stopTimer();

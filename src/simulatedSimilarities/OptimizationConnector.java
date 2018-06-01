@@ -15,6 +15,13 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TMap;
+import gnu.trove.map.hash.THashMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
 import model.CsvConnector;
 import utils.IOhelpers.CSVWriter;
 
@@ -25,20 +32,20 @@ public class OptimizationConnector {
 
 	private CsvConnector connector;
 	
-	private List<String> controlPatientsId;
-	private List<String> trialPatientsId;
+	private TIntArrayList controlPatientsId;
+	private TIntArrayList trialPatientsId;
 	
-	private	Table<String, String, Double> trialControlAssociation;
+	private	TIntObjectMap<TIntDoubleHashMap> trialControlAssociation;
 	private String inPath;
 	private String outPath;
 	
 	public OptimizationConnector(String inPath,String outPath) {
 		//this.connector = new CsvConnector(inPath);
 		this.inPath = inPath;
-		this.controlPatientsId = new ArrayList<>();
-		this.trialPatientsId = new ArrayList<>();
+		this.controlPatientsId = new TIntArrayList();
+		this.trialPatientsId = new TIntArrayList();
 		
-		this.trialControlAssociation = HashBasedTable.create();
+		this.trialControlAssociation = new TIntObjectHashMap<>();
 		this.outPath = outPath;
 	}
 
@@ -51,17 +58,18 @@ public class OptimizationConnector {
 		    String[] curLine = sc.nextLine().split(",");
 		    int lineLength = curLine.length - 1;
 			for (int i = FIRST_COLUMN_INDEX; i < lineLength; i++) {
-				this.controlPatientsId.add(curLine[i]);
+				this.controlPatientsId.add(Integer.valueOf(curLine[i]));
 			}
 		    while (sc.hasNextLine()) {
 		        curLine = sc.nextLine().split(",");
-		        String patientId = curLine[0];
+		        int patientId = Integer.valueOf(curLine[0]);
+		        TIntDoubleHashMap tempMap = new TIntDoubleHashMap();
 				for (int j = FIRST_COLUMN_INDEX; j < lineLength; j++) {
-					trialControlAssociation.put(patientId, controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
+					tempMap.put(controlPatientsId.get(j - 1), Double.valueOf(curLine[j]));
 				}
+				trialControlAssociation.put(patientId, tempMap);
 				trialPatientsId.add(patientId);				
 		    }
-		    System.out.println(trialControlAssociation.row("0").size() + " " + trialControlAssociation.column("0").size());
 		    if (sc.ioException() != null) {
 		        throw sc.ioException();
 		    }
@@ -75,25 +83,30 @@ public class OptimizationConnector {
 		}
 	}	
 	
-	public void writeMatrix(String filePath, List<String> resultControlId) {
+	public void writeMatrix(String filePath, TIntArrayList resultControlId) {
 		if (filePath == null) {
 			filePath = this.outPath;
 		}
 		CSVWriter csvWriter = new CSVWriter(filePath);
 		csvWriter.writeCell("Trial/Control");
-		for (String string : resultControlId) {
-			csvWriter.writeCell(string);
-		}
+		int resControlIdLength = resultControlId.size();
+		for (int i = 0; i < resControlIdLength; i++) {
+			csvWriter.writeCell(resultControlId.get(i));
+		} 			
+		
 		NumberFormat nf = NumberFormat.getInstance(new java.util.Locale( "USA" ));
 		csvWriter.newLine();
-		for (String trialId : trialPatientsId) {
+		int nbrTrial = trialPatientsId.size();
+		for (int i = 0; i < nbrTrial ; i++) {
+			int trialId = trialPatientsId.get(i);
 			csvWriter.writeCell(trialId);
-			for(String controlId : resultControlId) {
-				double sim = trialControlAssociation.get(trialId, controlId);
-				csvWriter.writeCell(nf.format(sim));
-			}
+			for (int j = 0; j < resControlIdLength; j++) {
+				double sim = trialControlAssociation.get(trialId).get(resultControlId.get(i));
+				csvWriter.writeCell(nf.format(sim));				
+			} 			
 			csvWriter.newLine();
-		}
+		}		
+			
 		try {
 			csvWriter.createCSVWithContent();;
 		} catch (IOException e) {
@@ -101,26 +114,28 @@ public class OptimizationConnector {
 		}
 	}
 	
-	public void mergeMatrixAndData(List<List<Double>> resultMatrix, List<String> resultControlId) {
+	public void mergeMatrixAndData(List<List<Double>> resultMatrix, TIntArrayList resultControlId) {
 		for (int i = 0; i < resultMatrix.size(); i++) {
 			List<Double> line = resultMatrix.get(i);
-			String trialId = trialPatientsId.get(i);
+			int trialId = trialPatientsId.get(i);
+			TIntDoubleHashMap tempMap = trialControlAssociation.get(trialId);
 			for (int j = 0; j < line.size(); j++) {
-				trialControlAssociation.put(trialId, resultControlId.get(j), line.get(j));
+				tempMap.put(resultControlId.get(j), line.get(j));
 			}
+			trialControlAssociation.put(trialId, tempMap);
 		}
 	}
 	
-	public List<String> getControlPatientsId() {
+	public TIntArrayList getControlPatientsId() {
 		return controlPatientsId;
 	}
 
-	public List<String> getTrialPatientsId() {
+	public TIntArrayList getTrialPatientsId() {
 		return trialPatientsId;
 	}
 
 
-	public Table<String, String, Double> getTrialControlAssociation() {
+	public TIntObjectMap<TIntDoubleHashMap> getTrialControlAssociation() {
 		return trialControlAssociation;
 	}
 

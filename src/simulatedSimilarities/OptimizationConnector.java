@@ -1,27 +1,16 @@
 package simulatedSimilarities;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Table;
-
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TMap;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
 import model.CsvConnector;
 import utils.IOhelpers.CSVWriter;
 
@@ -114,9 +103,9 @@ public class OptimizationConnector {
 		}
 	}
 	
-	public void mergeMatrixAndData(List<List<Double>> resultMatrix, TIntArrayList resultControlId) {
+	public void mergeMatrixAndData(TIntObjectMap<TDoubleArrayList> resultMatrix, TIntArrayList resultControlId) {
 		for (int i = 0; i < resultMatrix.size(); i++) {
-			List<Double> line = resultMatrix.get(i);
+			TDoubleArrayList line = resultMatrix.get(i);
 			int trialId = trialPatientsId.get(i);
 			TIntDoubleHashMap tempMap = trialControlAssociation.get(trialId);
 			for (int j = 0; j < line.size(); j++) {

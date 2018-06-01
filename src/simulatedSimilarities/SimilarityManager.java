@@ -3,7 +3,11 @@ package simulatedSimilarities;
 import java.util.List;
 import java.util.Random;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 
 public class SimilarityManager {	
 	
@@ -11,7 +15,7 @@ public class SimilarityManager {
 	private double maxSimSum;
 	private int nbrOfSwaps;
 	
-	private List<List<Double>> resultMatrix;
+	private TIntObjectMap<TDoubleArrayList> resultMatrix;
 	private TIntArrayList trialPatientsId;
 	
 	private OptimizationApp app;
@@ -37,13 +41,13 @@ public class SimilarityManager {
 		}
 	}
 
-	private double getOptimalSwap(List<Double> list) {
-		int nbrOfSims = list.size() - 1; // the last one belong to the diagonal
-		double chosenSim = list.get(nbrOfSims);
+	private double getOptimalSwap(TDoubleArrayList tDoubleArrayList) {
+		int nbrOfSims = tDoubleArrayList.size() - 1; // the last one belong to the diagonal
+		double chosenSim = tDoubleArrayList.get(nbrOfSims);
 		double max = chosenSim;
 		double currentSim;
 		for (int i = 0; i < nbrOfSims; i++) {
-			currentSim = list.get(i);
+			currentSim = tDoubleArrayList.get(i);
 			if (currentSim > chosenSim) {
 				nbrOfSwaps ++;
 				if (currentSim > max) {
@@ -87,7 +91,7 @@ public class SimilarityManager {
 
 	private void incrementSwapNumber(int trialSize, Random rand) {
 		int indiceLine = rand.nextInt(trialSize) + 1;
-		List<Double> line = resultMatrix.get(indiceLine);
+		TDoubleArrayList line = resultMatrix.get(indiceLine);
 		int lineSize = line.size() - 1;
 		double chosenSim = line.get(lineSize);
 		if (chosenSim < 1) {
@@ -100,22 +104,25 @@ public class SimilarityManager {
 	}
 
 	private int reduceNumberOfSwaps(int totalMaxSwap) {
-		for ( List<Double> line : resultMatrix) {
+		int nbrOfTrials = resultMatrix.size();
+		for (int i = 0; i < nbrOfTrials; i++) {
+			TDoubleArrayList line = resultMatrix.get(i);
 			if (line.get(line.size()-1)>=1.0) {
 				totalMaxSwap -= line.size() - 1;
 			}
-		}
+		} 	
+		
 		return totalMaxSwap;
 	}
 
-	private void ameliorateSim(Random rand, int indiceLine, List<Double> line, int indiceColumn, double chosenSim) {
+	private void ameliorateSim(Random rand, int indiceLine, TDoubleArrayList line, int indiceColumn, double chosenSim) {
 		double amelioratedSim = chosenSim + (1-chosenSim) * rand.nextDouble();
 		line.set(indiceColumn, amelioratedSim);
-		resultMatrix.set(indiceLine, line);
+		resultMatrix.put(indiceLine, line);
 	}
 	
-	public void setResultMatrix(List<List<Double>> resultMatrix) {
-		this.resultMatrix = resultMatrix;
+	public void setResultMatrix(TIntObjectMap<TDoubleArrayList> resultMatrix2) {
+		this.resultMatrix = resultMatrix2;
 	}
 
 	public double getSimSum() {

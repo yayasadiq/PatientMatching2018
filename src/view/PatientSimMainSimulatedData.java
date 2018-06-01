@@ -3,6 +3,10 @@ package view;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import optimisation.fullSearch.FullSearch;
 import optimisation.localSearch.HillClimber;
 import simulatedSimilarities.OptimizationApp;
@@ -83,13 +87,12 @@ public class PatientSimMainSimulatedData {
 
 	private static void runLocalSearch(SimilarityManager similarityManager, TimeMeasurer timeMeasurer,
 			OptimizationApp app) {
-		List<List<Double>> resultMatrix;
 		timeMeasurer.startTimer("Local Search");
 		int nFes = 100000;
 		
 		HillClimber localsearch = new HillClimber(nFes , app);
 		localsearch.evolve();
-		resultMatrix = app.makeMatrixWithIndex(localsearch.getBestSolution());
+		TIntObjectMap<TDoubleArrayList> resultMatrix = app.makeMatrixWithIndex(localsearch.getBestSolution());
 		similarityManager.setResultMatrix(resultMatrix);
 		similarityManager.computeSimilaritiesSum();
 		timeMeasurer.stopTimer();
@@ -97,11 +100,10 @@ public class PatientSimMainSimulatedData {
 
 	private static void runFullSearch(TimeMeasurer timeMeasurer, OptimizationApp app,
 			SimilarityManager similarityManager) {
-		List<List<Double>> resultMatrix;
 		timeMeasurer.startTimer("Full Search");
 		FullSearch fullSearch = new FullSearch(app);
 		fullSearch.optimize();
-		resultMatrix = app.getResultMatrix();
+		TIntObjectMap<TDoubleArrayList>resultMatrix = app.getResultMatrix();
 		similarityManager.setResultMatrix(resultMatrix);
 		similarityManager.computeSimilaritiesSum();
 		timeMeasurer.stopTimer();

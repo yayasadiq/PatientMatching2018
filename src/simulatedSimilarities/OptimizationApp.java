@@ -1,21 +1,13 @@
 package simulatedSimilarities;
 
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
 
-import com.google.common.collect.Table;
-
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import gnu.trove.set.TIntSet;
-import utils.IOhelpers.InputManager;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class OptimizationApp{
 	
@@ -23,7 +15,7 @@ public class OptimizationApp{
 
 	private TIntArrayList resultControlId;
 	private TIntArrayList trialPatientsId;
-	private List<List<Double>> resultMatrix;
+	private TIntObjectMap<TDoubleArrayList> resultMatrix;
 	
 	private TIntObjectMap<TIntDoubleHashMap> trialControlAssociation;
 
@@ -73,23 +65,23 @@ public class OptimizationApp{
 		return maxId;
 	}
 	
-	public List<List<Double>> makeMatrix(TIntArrayList resultControlId2) {
-		List<List<Double>> triangularMatrix = new ArrayList<>();
+	public TIntObjectMap<TDoubleArrayList> makeMatrix(TIntArrayList resultControlId2) {
+		TIntObjectMap<TDoubleArrayList> triangularMatrix = new TIntObjectHashMap<>();
 		int counter = 1;
 		int nbrOfTrials = trialPatientsId.size();
 		for (int i = 0; i < nbrOfTrials; i++) {			
-			List<Double> sims = new ArrayList<>();
+			TDoubleArrayList sims = new TDoubleArrayList();
 			for(int j = 0; j < counter; j++) {
 				double sim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId2.get(j));
 				sims.add(sim);
 			}
-			triangularMatrix.add(sims);
+			triangularMatrix.put(i, sims);
 			counter ++;
 		}
 		return triangularMatrix;
 	}
 	
-	public List<List<Double>> makeMatrixWithIndex(List<Integer> indexControl) {
+	public TIntObjectMap<TDoubleArrayList> makeMatrixWithIndex(List<Integer> indexControl) {
 		TIntArrayList controlIds = new TIntArrayList();
 		int lengthSolutions = indexControl.size();
 		for (int i = 0; i < lengthSolutions; i++) {
@@ -120,14 +112,14 @@ public class OptimizationApp{
 
 	private void changeColumn(Integer x, int nbrOfTrial) {
 		for (int i = x; i < nbrOfTrial; i++) {
-			List<Double> line = resultMatrix.get(i);
+			TDoubleArrayList line = resultMatrix.get(i);
 			Double newSim = trialControlAssociation.get(trialPatientsId.get(i)).get(resultControlId.get(x));
 			line.set(x, newSim);
-			resultMatrix.set(i, line);
+			resultMatrix.put(i, line);
 		}
 	}
 
-	public List<List<Double>> getResultMatrix() {
+	public TIntObjectMap<TDoubleArrayList> getResultMatrix() {
 		return resultMatrix;
 	}
 
@@ -139,7 +131,7 @@ public class OptimizationApp{
 		return resultControlId.size();
 	}
 	
-	public void setResultMatrix(List<List<Double>> resultMatrix) {
+	public void setResultMatrix(TIntObjectMap<TDoubleArrayList> resultMatrix) {
 		this.resultMatrix = resultMatrix;
 		optimizationConnector.mergeMatrixAndData(resultMatrix, resultControlId);
 		this.writeMatrix();

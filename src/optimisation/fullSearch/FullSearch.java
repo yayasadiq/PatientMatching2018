@@ -1,12 +1,16 @@
 package optimisation.fullSearch;
 
 import java.util.List;
+
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import simulatedSimilarities.OptimizationApp;
 
 public class FullSearch {
 	
 	private OptimizationApp optimizationApp;
-	List<List<Double>> resultMatrix;
+	TIntObjectMap<TDoubleArrayList> resultMatrix;
 	
 	public FullSearch(OptimizationApp optimizationApp) {
 		this.optimizationApp = optimizationApp;
@@ -18,7 +22,7 @@ public class FullSearch {
 		int listSize = resultMatrix.size();
 		int i = 1;
 		while ( i < listSize) {
-			List<Double> line = resultMatrix.get(i);
+			TDoubleArrayList line = resultMatrix.get(i);
 			int numberColumn = isThereABetterSolution(i, line);
 			if(numberColumn != -1) {
 				i = numberColumn;
@@ -28,7 +32,7 @@ public class FullSearch {
 		}
 	}
 
-	private int isThereABetterSolution( int i, List<Double> line) {
+	private int isThereABetterSolution( int i, TDoubleArrayList line) {
 		
 		int lineLength = line.size() - 1;
 		double chosenSim = line.get(lineLength);

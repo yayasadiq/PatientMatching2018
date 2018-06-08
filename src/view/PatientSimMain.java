@@ -37,8 +37,8 @@ import optimisation.utils.Utils;
  */
 public class PatientSimMain {
     
-    private static final int NUMBER_TRIAL_PATIENT = 100;
-	private static int NUMBER_CONTROL_PATIENT = 1000;
+    private static final int NUMBER_TRIAL_PATIENT = 2000;
+	private static int NUMBER_CONTROL_PATIENT;
 	private static final String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 	private static final String cbPath = dirPath + "ControlsModified.csv"; 
 	private static final String qPath = dirPath + "CasesModified.csv";
@@ -48,8 +48,8 @@ public class PatientSimMain {
 	private static TimeMeasurer timeMeasurer = new TimeMeasurer();
 
 	public static void main(String[] args) {
-		
-		while (NUMBER_CONTROL_PATIENT < 12000) {
+		NUMBER_CONTROL_PATIENT = NUMBER_TRIAL_PATIENT;
+		while (NUMBER_CONTROL_PATIENT - NUMBER_TRIAL_PATIENT < 1000) {
 			CSVWriter csvWriter = new CSVWriter(outSim);
 			timeMeasurer.startTimer("Total :");
 			generatePatients();
@@ -85,7 +85,7 @@ public class PatientSimMain {
 				}
 	            app.postCycle();
 	            csvWriter = new CSVWriter(statPath);
-//	            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT, csvWriter);
+	            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT, csvWriter);
 				timeMeasurer.stopTimer();
 				csvWriter.writeCell(timeMeasurer.getLastTime());
 				csvWriter.newLine();
@@ -98,12 +98,10 @@ public class PatientSimMain {
 	        }catch(ExecutionException e){
 	            System.err.println(e.getMessage());
 	        }
-			NUMBER_CONTROL_PATIENT += 1000;
+			NUMBER_CONTROL_PATIENT += 100;
 		}
 
     }
-
-	
 
 	private static void generatePatients() {
 		try {
@@ -174,26 +172,6 @@ public class PatientSimMain {
 		System.out.println("Average of the local search : " + averageLocalSol);
 		createRecapLigne(evaluateSolution, localSearchSolution, averageDif, currentDif);
 	}
-	
-    
-//    public static void optimise(){
-//        int numberOfTrialPatients = 40;	
-//		int[] startingSolution = new int[numberOfTrialPatients];
-//		for(int i=0; i<numberOfTrialPatients; i++){ // Currently set with dummy indices for testing purposes
-//			startingSolution[i] = i;
-//		}
-//		
-//		PatientMatchingProblem problem = new PatientMatchingProblem(app);
-//		
-//		System.out.println("Initial Solution: "+Utils.tableToString(startingSolution,","));
-//		System.out.println("Initial Solution Fitness: "+problem.evaluate(startingSolution));
-//		
-//		int numberOfFitnessEvaluations = 1000;
-//		HillClimber localsearch = new HillClimber(startingSolution, numberOfFitnessEvaluations, problem);
-//		localsearch.evolve();
-//		
-//		System.out.println("Best Solution after Local Search: "+Utils.tableToString(localsearch.getBestSolution(),","));
-//		System.out.println("Best Fitness: "+localsearch.getBestFitness());
-//    }
+
     
 }

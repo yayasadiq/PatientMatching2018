@@ -1,36 +1,32 @@
 package ordering;
 
-import java.util.Collections;
-
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import simulatedSimilarities.OptimizationConnector;
 
-public class TrialSort {
-	
+public class DescendingSort implements OrderingMethod{
 	private TIntArrayList trialPatientsId;
 	private TIntArrayList controlPatientsId;
 	private TDoubleArrayList trialHigherSim;
 	
 	private TIntObjectMap<TIntDoubleHashMap> trialControlAssociation;
 	
-	public TrialSort(OptimizationConnector optimizationConnector) {
+	public DescendingSort(OptimizationConnector optimizationConnector) {
 		this.trialControlAssociation = optimizationConnector.getTrialControlAssociation();
 		this.controlPatientsId = optimizationConnector.getControlPatientsId();
 		this.trialPatientsId = optimizationConnector.getTrialPatientsId();
 		this.trialHigherSim = new TDoubleArrayList();
 	}
 	
-	public void ascendingSort() {
+	public void runSort() {
 		int nbrOfTrials = trialPatientsId.size();
 		for (int i = 0; i < nbrOfTrials; i++) {
 			int trialId = trialPatientsId.get(i);
 			trialHigherSim.add(getMax(trialControlAssociation.get(trialId)));
 		}
 		quickAscendentSort(0, nbrOfTrials - 2, nbrOfTrials - 1);
-		System.out.println(trialHigherSim);
 	}
 	
 	private void quickAscendentSort( int left, int right, int indexPivot) {
@@ -39,9 +35,9 @@ public class TrialSort {
 			int rightPointer = right;
 			double pivot = trialHigherSim.get(indexPivot);
 			while(true) {
-				while(trialHigherSim.get(leftPointer) < pivot)
+				while(trialHigherSim.get(leftPointer) > pivot)
 					leftPointer ++;
-				while(trialHigherSim.get(rightPointer) > pivot && rightPointer > 0)
+				while(trialHigherSim.get(rightPointer) < pivot && rightPointer > 0)
 					rightPointer --;
 				
 				if (leftPointer >= rightPointer) {
@@ -55,17 +51,6 @@ public class TrialSort {
 			quickAscendentSort(left, leftPointer - 2, leftPointer - 1);
 		}		
 	}
-	
-
-
-	private void swap(int leftPointer, int rightPointer) {
-		 int tempId = trialPatientsId.get(leftPointer);
-		 trialPatientsId.set(leftPointer, trialPatientsId.get(rightPointer));
-		 trialPatientsId.set(rightPointer, tempId);
-		 double tempSim = trialHigherSim.get(leftPointer);
-		 trialHigherSim.set(leftPointer, trialHigherSim.get(rightPointer));
-		 trialHigherSim.set(rightPointer, tempSim);
-	}
 
 	private double getMax(TIntDoubleHashMap tIntDoubleHashMap) {
 		int nbrOfControls = controlPatientsId.size();
@@ -76,6 +61,14 @@ public class TrialSort {
 		}
 		return maxValue;
 	}
-	
+
+	private void swap(int leftPointer, int rightPointer) {
+		 int tempId = trialPatientsId.get(leftPointer);
+		 trialPatientsId.set(leftPointer, trialPatientsId.get(rightPointer));
+		 trialPatientsId.set(rightPointer, tempId);
+		 double tempSim = trialHigherSim.get(leftPointer);
+		 trialHigherSim.set(leftPointer, trialHigherSim.get(rightPointer));
+		 trialHigherSim.set(rightPointer, tempSim);
+	}
 	
 }

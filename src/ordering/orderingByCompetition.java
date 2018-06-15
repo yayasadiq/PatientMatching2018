@@ -6,6 +6,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import simulatedSimilarities.OptimizationConnector;
+import utils.timer.TimeMeasurer;
 
 public class orderingByCompetition implements OrderingMethod {
 	private TIntArrayList trialPatientsId;
@@ -23,15 +24,26 @@ public class orderingByCompetition implements OrderingMethod {
 
 	@Override
 	public void runSort() {
+		TimeMeasurer timeMeasurer = new TimeMeasurer();
+		timeMeasurer.startTimer("Sort");
 		int nbrOfTrials = trialPatientsId.size();
 		for (int i = 0; i < nbrOfTrials; i++) {
 			int trialId = trialPatientsId.get(i);
 			trialHigherSim.add(getMaxId(trialControlAssociation.get(trialId)));
 		}
 		actualise(nbrOfTrials);
-		coutingSort(trialHigherSim.max() + 1, nbrOfTrials);
+		coutingSort(trialHigherSim.max(), nbrOfTrials);
+		timeMeasurer.stopTimer();
 	}
-
+	
+	private void swap(int leftPointer, int rightPointer) {
+		 int tempId = trialPatientsId.get(leftPointer);
+		 trialPatientsId.set(leftPointer, trialPatientsId.get(rightPointer));
+		 trialPatientsId.set(rightPointer, tempId);
+		 int tempSim = trialHigherSim.get(leftPointer);
+		 trialHigherSim.set(leftPointer, trialHigherSim.get(rightPointer));
+		 trialHigherSim.set(rightPointer, tempSim);
+	}
 	
 	private void coutingSort(int max, int nbrOfTrials){
         
@@ -53,7 +65,7 @@ public class orderingByCompetition implements OrderingMethod {
             --count[trialHigherSim.get(i)];
         }
         
-        for (int i = nbrOfTrials; i > 0; i--)
+        for (int i = nbrOfTrials - 1; i > 0; i--)
         	trialPatientsId.set(i, output[i]);
  
     }

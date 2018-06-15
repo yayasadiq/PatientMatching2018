@@ -37,8 +37,8 @@ import optimisation.utils.Utils;
  */
 public class PatientSimMain {
     
-    private static final int NUMBER_TRIAL_PATIENT = 2000;
-	private static int NUMBER_CONTROL_PATIENT;
+    private static final int NUMBER_TRIAL_PATIENT = 2500;
+	private static final int NUMBER_CONTROL_PATIENT = 6000;
 	private static final String dirPath = "/home/gat/Documents/Travail/Stage/Code_and_Data/PatientPairs/PatientMatching/";
 	private static final String cbPath = dirPath + "ControlsModified.csv"; 
 	private static final String qPath = dirPath + "CasesModified.csv";
@@ -48,58 +48,55 @@ public class PatientSimMain {
 	private static TimeMeasurer timeMeasurer = new TimeMeasurer();
 
 	public static void main(String[] args) {
-		NUMBER_CONTROL_PATIENT = NUMBER_TRIAL_PATIENT;
-		while (NUMBER_CONTROL_PATIENT - NUMBER_TRIAL_PATIENT < 1000) {
-			CSVWriter csvWriter = new CSVWriter(outSim);
-			timeMeasurer.startTimer("Total :");
-			generatePatients();
-	        PatientSim app = new PatientSim(cbPath, outPath);
-	        List<String> controls = new ArrayList<>();
-	        
-			try{
-	            app.configure();
-	            CBRCaseBase caseBase = app.preCycle();
-	            Collection<CBRCase> cases = caseBase.getCases();
-	            Map<String, CBRCase> casesMap = new HashMap();
-	            for(CBRCase c:cases){
-	                casesMap.put((String)c.getID(), c);
-	            }
-	            Connector conn = new MockPatientConnector(qPath);
-	            List<CBRCase> qCases = (List)conn.retrieveAllCases();
-	            Map<String, CBRCase> queriesMap = new HashMap();
-	            for(CBRCase c:qCases){
-	                queriesMap.put((String)c.getID(), c);
-	            }
-	           
-	            try {
-	            	app.writeControls(csvWriter);
-	            	csvWriter.createCSVWithContent();
-	            	app.setqCases(qCases);
-	                for(CBRCase c:qCases){
-	                    app.writeSimilarities(c, csvWriter);
-	                    System.out.println("Done !");
-	                }
-	            	csvWriter.saveData();
-	            } catch (IOException e) {
-					e.printStackTrace();
+		CSVWriter csvWriter = new CSVWriter(outSim);
+		timeMeasurer.startTimer("Total :");
+		generatePatients();
+		PatientSim app = new PatientSim(cbPath, outPath);
+		List<String> controls = new ArrayList<>();
+
+		try{
+			app.configure();
+			CBRCaseBase caseBase = app.preCycle();
+			Collection<CBRCase> cases = caseBase.getCases();
+			Map<String, CBRCase> casesMap = new HashMap();
+			for(CBRCase c:cases){
+				casesMap.put((String)c.getID(), c);
+			}
+			Connector conn = new MockPatientConnector(qPath);
+			List<CBRCase> qCases = (List)conn.retrieveAllCases();
+			Map<String, CBRCase> queriesMap = new HashMap();
+			for(CBRCase c:qCases){
+				queriesMap.put((String)c.getID(), c);
+			}
+
+			try {
+				app.writeControls(csvWriter);
+				csvWriter.createCSVWithContent();
+				app.setqCases(qCases);
+				for(CBRCase c:qCases){
+					app.writeSimilarities(c, csvWriter);
+					System.out.println("Done !");
 				}
-	            app.postCycle();
-	            csvWriter = new CSVWriter(statPath);
-	            Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT, csvWriter);
-				timeMeasurer.stopTimer();
-				csvWriter.writeCell(timeMeasurer.getLastTime());
-				csvWriter.newLine();
-				timeMeasurer.displayTimes();
-				try {
-					csvWriter.saveData();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-	        }catch(ExecutionException e){
-	            System.err.println(e.getMessage());
-	        }
-			NUMBER_CONTROL_PATIENT += 100;
+				csvWriter.saveData();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			app.postCycle();
+			csvWriter = new CSVWriter(statPath);
+			Tests.main(args, NUMBER_CONTROL_PATIENT, NUMBER_TRIAL_PATIENT, csvWriter);
+			timeMeasurer.stopTimer();
+			csvWriter.writeCell(timeMeasurer.getLastTime());
+			csvWriter.newLine();
+			timeMeasurer.displayTimes();
+			try {
+				csvWriter.saveData();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}catch(ExecutionException e){
+			System.err.println(e.getMessage());
 		}
+		
 
     }
 
